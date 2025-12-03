@@ -1,16 +1,12 @@
-// src/engine/core/BaseGenerator.js
-
 class BaseGenerator {
   constructor(difficulty = "medium") {
     this.difficulty = difficulty;
   }
 
-  // Metoda, którą każdy generator musi nadpisać
   generate() {
     throw new Error("Method 'generate()' must be implemented.");
   }
 
-  // Pomocnicza struktura odpowiedzi
   createResponse({
     question,
     latex,
@@ -26,17 +22,17 @@ class BaseGenerator {
         difficulty: this.difficulty,
       },
       content: {
-        question_text: question, // Tekst z placeholderami
-        question_latex: latex, // Surowy LaTeX do renderowania
-        image_svg: image, // Kod SVG
-        variables: variables, // Wylosowane liczby (dla debugowania)
+        question_text: question, // placeholder text
+        question_latex: latex, // raw LaTeX
+        image_svg: image, // SVG code
+        variables: variables, // for debugging mostly
       },
       answers: {
         correct: correctAnswer,
-        distractors: distractors, // 3 błędne odpowiedzi
+        distractors: distractors, // 3 wrong answers
       },
       solution: {
-        steps: steps, // Tablica kroków rozwiązania
+        steps: steps, // array of strings explaining the solution
       },
     };
   }
