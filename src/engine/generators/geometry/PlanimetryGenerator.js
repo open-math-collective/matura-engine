@@ -5,7 +5,6 @@ class PlanimetryGenerator extends BaseGenerator {
   generate() {
     const variants = [
       "circle_angles", // Kąt środkowy i wpisany
-      "right_triangle_trig", // Sinus, cosinus, tangens
       "triangle_similarity", // Pola figur podobnych (k^2)
       "rhombus_area", // Pole rombu z przekątnych
       "circle_tangent", // NOWOŚĆ: Styczna do okręgu (Pitagoras)
@@ -31,9 +30,8 @@ class PlanimetryGenerator extends BaseGenerator {
         return this.generateQuadrilateralAngles();
       case "isosceles_angles":
         return this.generateIsoscelesAngles();
-      case "right_triangle_trig":
       default:
-        return this.generateTrigProblem();
+        return this.generateCircleAngles();
     }
   }
 
@@ -65,55 +63,6 @@ class PlanimetryGenerator extends BaseGenerator {
         mode === "find_central"
           ? `$$\\beta = 2 \\cdot ${alpha}^\\circ = ${beta}^\\circ$$`
           : `$$\\alpha = ${beta}^\\circ : 2 = ${alpha}^\\circ$$`,
-      ],
-    });
-  }
-
-  // --- 2. TRYGONOMETRIA (Bez zmian) ---
-  generateTrigProblem() {
-    const triples = [
-      [3, 4, 5],
-      [5, 12, 13],
-      [8, 15, 17],
-      [7, 24, 25],
-    ];
-    const [baseA, baseB, baseC] = MathUtils.randomElement(triples);
-    const k = MathUtils.randomInt(1, 2);
-    const a = baseA * k,
-      b = baseB * k,
-      c = baseC * k;
-    const func = MathUtils.randomElement(["sin", "cos", "tg"]);
-
-    let ans, latex;
-    if (func === "sin") {
-      ans = baseA / baseC;
-      latex = `\\frac{${baseA}}{${baseC}}`;
-    } else if (func === "cos") {
-      ans = baseB / baseC;
-      latex = `\\frac{${baseB}}{${baseC}}`;
-    } else {
-      ans = baseA / baseB;
-      latex = `\\frac{${baseA}}{${baseB}}`;
-    }
-
-    return this.createResponse({
-      question: `W trójkącie prostokątnym przyprostokątne mają długości $$${a}$$ i $$${b}$$, a przeciwprostokątna $$${c}$$. Kąt $$\\alpha$$ leży naprzeciwko boku $$${a}$$. Wartość $$${func}\\alpha$$ to:`,
-      latex: `a=${a}, b=${b}, c=${c}`,
-      image: this.generateSVG({ type: "right_triangle", a, b, c }),
-      variables: { a, b, c, func },
-      correctAnswer: latex,
-      distractors: [
-        func === "sin"
-          ? `\\frac{${baseB}}{${baseC}}`
-          : func === "cos"
-            ? `\\frac{${baseA}}{${baseC}}`
-            : `\\frac{${baseB}}{${baseA}}`,
-        `\\frac{${baseC}}{${baseA}}`,
-        `\\frac{1}{2}`,
-      ],
-      steps: [
-        `Definicja $$${func}\\alpha$$ w trójkącie prostokątnym.`,
-        `Podstawiamy boki i skracamy ułamek: $$${latex}$$`,
       ],
     });
   }
