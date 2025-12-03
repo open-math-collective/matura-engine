@@ -7,6 +7,7 @@ const AnalyticGenerator = require("./src/engine/generators/geometry/AnalyticGene
 const SequencesGenerator = require("./src/engine/generators/sequences/SequencesGenerator");
 const AlgebraGenerator = require("./src/engine/generators/algebra/AlgebraGenerator");
 const PlanimetryGenerator = require("./src/engine/generators/geometry/PlanimetryGenerator");
+const StereometryGenerator = require("./src/engine/generators/geometry/StereometryGenerator");
 
 const problems = require("./problems.json");
 
@@ -217,5 +218,17 @@ app.get("/api/v2/generator/planimetry", (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Błąd generatora planimetrii" });
+  }
+});
+
+app.get("/api/v2/generator/stereometry", (req, res) => {
+  try {
+    const difficulty = req.query.difficulty || "medium";
+    const generator = new StereometryGenerator(difficulty);
+    const problem = generator.generate();
+    res.json(problem);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Błąd generatora stereometrii" });
   }
 });
