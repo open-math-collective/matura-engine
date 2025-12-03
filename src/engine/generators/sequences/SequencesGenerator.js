@@ -4,19 +4,46 @@ const MathUtils = require("../../utils/MathUtils");
 class SequencesGenerator extends BaseGenerator {
   generate() {
     const variants = [
-      "nth_term", // Oblicz a_n ze wzoru
-      "arithmetic_x", // Liczby (a, x, b) są ciągiem arytmetycznym
-      "geometric_x", // Liczby (a, x, b) są ciągiem geometrycznym
-      "arithmetic_params", // Mając a_k i a_m oblicz r
-      "arithmetic_sum", // NOWOŚĆ: Suma n wyrazów ciągu arytmetycznego
-      "geometric_sum", // NOWOŚĆ: Suma n wyrazów ciągu geometrycznego
-      "which_term", // NOWOŚĆ: Którym wyrazem jest liczba X?
-      "count_terms", // NOWOŚĆ: Ile wyrazów jest mniejszych od X?
+      // STARE (8)
+      "nth_term", // a_n ze wzoru
+      "arithmetic_x", // (a, x, b) arytmetyczny
+      "geometric_x", // (a, x, b) geometryczny
+      "arithmetic_params", // a_k i a_m -> r
+      "arithmetic_sum", // Suma n wyrazów arytm
+      "geometric_sum", // Suma n wyrazów geom
+      "which_term", // Którym wyrazem jest X
+      "count_terms", // Ile wyrazów < X
+
+      // NOWE (7)
+      "geometric_ratio_dist", // a_2=27, a_5=1 -> q
+      "arithmetic_algebraic", // (x-1, x+2, 2x) arytmetyczny -> x
+      "geometric_algebraic", // (x, x+2, x+6) geometryczny -> x
+      "sequence_monotonicity", // Czy an = -2n+5 jest rosnący?
+      "quadratic_sequence_pos", // Ile wyrazów an = -n^2... jest dodatnich?
+      "sequence_average", // Średnia wyrazów ciągu
+      "sum_formula_analysis", // Sn = n^2 - n -> a_n?
     ];
 
     const selectedVariant = MathUtils.randomElement(variants);
 
     switch (selectedVariant) {
+      // NOWE
+      case "geometric_ratio_dist":
+        return this.generateGeometricRatioDist();
+      case "arithmetic_algebraic":
+        return this.generateArithmeticAlgebraic();
+      case "geometric_algebraic":
+        return this.generateGeometricAlgebraic();
+      case "sequence_monotonicity":
+        return this.generateSequenceMonotonicity();
+      case "quadratic_sequence_pos":
+        return this.generateQuadraticSequencePos();
+      case "sequence_average":
+        return this.generateSequenceAverage();
+      case "sum_formula_analysis":
+        return this.generateSumFormulaAnalysis();
+
+      // STARE
       case "arithmetic_x":
         return this.generateArithmeticX();
       case "geometric_x":
@@ -37,182 +64,274 @@ class SequencesGenerator extends BaseGenerator {
     }
   }
 
-  // --- NOWOŚĆ 1: SUMA CIĄGU ARYTMETYCZNEGO ---
-  generateArithmeticSum() {
-    // Sn = ((a1 + an) / 2) * n
-    const n = MathUtils.randomInt(5, 20); // Liczymy sumę np. 10 wyrazów
-    const a1 = MathUtils.randomInt(-10, 10);
-    const r = MathUtils.randomInt(-5, 5) || 2;
+  // =================================================================
+  // NOWE METODY (V3)
+  // =================================================================
 
-    const an = a1 + (n - 1) * r;
-    const sum = ((a1 + an) / 2) * n;
+  // --- 1. ILORAZ CIĄGU GEOMETRYCZNEGO (ODLEGŁE WYRAZY) ---
+  generateGeometricRatioDist() {
+    // a_k = val1, a_m = val2. Oblicz q.
+    // a_m = a_k * q^(m-k) => q = root(val2/val1, m-k)
 
-    // Warianty treści: podany wzór ogólny LUB podane a1 i r
-    const mode = MathUtils.randomElement(["formula", "params"]);
+    const q = MathUtils.randomElement([-3, -2, 2, 3, 4]); // całkowite q
+    const k = MathUtils.randomInt(1, 2);
+    const diff = MathUtils.randomElement([2, 3]); // różnica indeksów (potęga q)
+    const m = k + diff;
 
-    let question, latex, dist1, dist2;
-
-    if (mode === "formula") {
-      // Generujemy wzór an = r*n + (a1-r)
-      const b = a1 - r;
-      const formula = `a_n = ${r}n ${b >= 0 ? "+" : ""}${b}`;
-      question = `Oblicz sumę $$${n}$$ początkowych wyrazów ciągu arytmetycznego określonego wzorem $$${formula}$$ dla $$n \\ge 1$$.`;
-      latex = formula;
-      dist1 = sum + n * r; // Błąd przesunięcia
-      dist2 = sum - a1;
-    } else {
-      question = `W ciągu arytmetycznym $$a_1 = ${a1}$$ oraz $$r = ${r}$$. Oblicz sumę $$${n}$$ początkowych wyrazów tego ciągu.`;
-      latex = `a_1=${a1}, r=${r}`;
-      dist1 = ((a1 + an) / 2) * (n - 1); // Złe n
-      dist2 = (a1 + an) * n; // Brak dzielenia przez 2
-    }
+    const a1 = MathUtils.randomInt(1, 5);
+    const valK = a1 * Math.pow(q, k - 1);
+    const valM = valK * Math.pow(q, diff);
 
     return this.createResponse({
-      question: question,
-      latex: latex,
+      question: `W ciągu geometrycznym $$(a_n)$$ dane są wyrazy $$a_{${k}} = ${valK}$$ oraz $$a_{${m}} = ${valM}$$. Iloraz $$q$$ tego ciągu jest równy:`,
+      latex: `a_{${k}}=${valK}, a_{${m}}=${valM}`,
       image: null,
-      variables: { a1, r, n, an },
-      correctAnswer: `${sum}`,
-      distractors: [`${dist1}`, `${dist2}`, `${sum + 10}`],
-      steps: [
-        `Wzór na sumę $$n$$ wyrazów ciągu arytmetycznego: $$S_n = \\frac{a_1 + a_n}{2} \\cdot n$$`,
-        mode === "formula"
-          ? `Najpierw obliczamy $$a_1$$ i $$a_{${n}}$$ ze wzoru ciągu.`
-          : `Najpierw obliczamy $$a_{${n}}$$ ze wzoru $$a_n = a_1 + (n-1)r$$`,
-        `$$a_1 = ${a1}$$`,
-        `$$a_{${n}} = ${a1} + (${n}-1)\\cdot(${r}) = ${a1} + ${n - 1}\\cdot${r} = ${an}$$`,
-        `Podstawiamy do wzoru na sumę:`,
-        `$$S_{${n}} = \\frac{${a1} + ${an}}{2} \\cdot ${n} = \\frac{${a1 + an}}{2} \\cdot ${n} = ${(a1 + an) / 2} \\cdot ${n} = ${sum}$$`,
-      ],
-    });
-  }
-
-  // --- NOWOŚĆ 2: SUMA CIĄGU GEOMETRYCZNEGO ---
-  generateGeometricSum() {
-    // Sn = a1 * (1 - q^n) / (1 - q)
-    const n = MathUtils.randomInt(3, 6); // Małe n, bo potęgi rosną szybko
-    const q = MathUtils.randomElement([-3, -2, 2, 3]); // q != 1
-    const a1 = MathUtils.randomInt(1, 4); // Małe a1
-
-    const sum = (a1 * (1 - Math.pow(q, n))) / (1 - q);
-
-    return this.createResponse({
-      question: `Oblicz sumę $$${n}$$ początkowych wyrazów ciągu geometrycznego, w którym $$a_1 = ${a1}$$ oraz iloraz $$q = ${q}$$.`,
-      latex: `a_1=${a1}, q=${q}`,
-      image: null,
-      variables: { a1, q, n },
-      correctAnswer: `${sum}`,
+      variables: { k, m, q, valK, valM },
+      correctAnswer: `${q}`,
       distractors: [
-        `${(a1 * (1 - Math.pow(q, n - 1))) / (1 - q)}`, // Suma n-1 wyrazów
-        `${sum * q}`,
-        `${a1 * Math.pow(q, n - 1)}`, // Wzór na n-ty wyraz zamiast sumy
+        `${q * 2}`,
+        `${valM / valK}`, // q^diff
+        `${q > 0 ? -q : Math.abs(q)}`, // Zły znak
       ],
       steps: [
-        `Wzór na sumę $$n$$ wyrazów ciągu geometrycznego: $$S_n = a_1 \\cdot \\frac{1-q^n}{1-q}$$`,
-        `Podstawiamy dane: $$a_1 = ${a1}, q = ${q}, n = ${n}$$`,
-        `$$S_{${n}} = ${a1} \\cdot \\frac{1-(${q})^{${n}}}{1-(${q})}$$`,
-        `Obliczamy potęgę: $$(${q})^{${n}} = ${Math.pow(q, n)}$$`,
-        `$$S_{${n}} = ${a1} \\cdot \\frac{1 - ${Math.pow(q, n)}}{${1 - q}} = ${a1} \\cdot \\frac{${1 - Math.pow(q, n)}}{${1 - q}}$$`,
-        `$$S_{${n}} = ${a1} \\cdot (${(1 - Math.pow(q, n)) / (1 - q)}) = ${sum}$$`,
+        `Korzystamy ze wzoru: $$a_m = a_k \\cdot q^{m-k}$$`,
+        `$$${valM} = ${valK} \\cdot q^{${m}-${k}} = ${valK} \\cdot q^{${diff}}$$`,
+        `$$q^{${diff}} = \\frac{${valM}}{${valK}} = ${Math.pow(q, diff)}$$`,
+        `$$q = \\sqrt[${diff}]{${Math.pow(q, diff)}} = ${q}$$`,
       ],
     });
   }
 
-  // --- NOWOŚĆ 3: KTÓRYM WYRAZEM JEST LICZBA X? ---
-  generateWhichTerm() {
-    // a_n = n^2 + bn + c = X. Szukamy n (musi być całkowite > 0)
-    // Reverse engineering: Losujemy n (np. 5), wyliczamy X.
+  // --- 2. CIĄG ARYTMETYCZNY Z "X" (ALGEBRAICZNY) ---
+  generateArithmeticAlgebraic() {
+    // Liczby (x-a, x+b, k*x) tworzą ciąg arytmetyczny.
+    // Środkowy = (lewy + prawy) / 2 => 2*Środkowy = Lewy + Prawy
 
-    const n = MathUtils.randomInt(2, 12);
+    // Ustalmy x.
+    const x = MathUtils.randomInt(2, 8);
+    // Generujemy wyrażenia. Np. x+1, 2x, 4x-3
+    // Niech wyrazy to: T1, T2, T3.
+    // T1 = x + a
+    // T2 = b*x + c
+    // T3 = d*x + e
+    // Warunek: 2(b*x+c) = (x+a) + (d*x+e)
+    // 2bx + 2c = (1+d)x + (a+e)
+    // 2b = 1+d  ORAZ  2c = a+e (żeby to była tożsamość? Nie, to równanie dla konkretnego x)
 
-    // Formuła: kwadratowa n^2 + ... (częsta na maturze) lub liniowa -2n + ...
-    const type = MathUtils.randomElement(["quadratic", "linear"]);
+    // Uprośćmy: (x+1, 2x, 4x-3)
+    // 4x = x+1 + 4x-3 => 4x = 5x - 2 => x = 2.
 
-    let a, b, c, X, formula;
+    const a = MathUtils.randomInt(-3, 3);
+    const b_coeff = MathUtils.randomInt(2, 4); // coeff środkowego
+    const d_coeff = 2 * b_coeff - 1; // żeby x się nie skrócił całkowicie po prawej
 
-    if (type === "linear") {
-      a = MathUtils.randomInt(-5, 5) || 2;
-      b = MathUtils.randomInt(-10, 10);
-      X = a * n + b;
-      formula = `a_n = ${a}n ${b >= 0 ? "+" : ""}${b}`;
-    } else {
-      // n^2 - 4n - 5
-      a = 1;
-      b = -MathUtils.randomInt(1, 10); // Żeby parabola miała wierzchołek po prawej
-      c = MathUtils.randomInt(-10, 10);
-      X = n * n + b * n + c;
-      formula = `a_n = n^2 ${b >= 0 ? "+" : ""}${b}n ${c >= 0 ? "+" : ""}${c}`;
-    }
+    // Lewy: x + a
+    // Środek: b_coeff * x
+    // Prawy: d_coeff * x + e
+
+    // 2 * (b_coeff * x) = (x + a) + (d_coeff * x + e)
+    // 2*b*x = x + d*x + a + e
+    // (2b - 1 - d)x = a + e
+    // x = (a+e) / coeff_res
+
+    // Ustalmy coeff_res = 1. Wtedy d = 2b - 2.
+    const d_real = 2 * b_coeff - 2;
+    // Wtedy x = a + e.
+    // Losujemy x, a. Obliczamy e.
+    const e = x - a;
+
+    // Wyrazy:
+    const t1 = `x ${a >= 0 ? "+" : ""}${a}`;
+    const t2 = `${b_coeff}x`;
+    const t3 = `${d_real}x ${e >= 0 ? "+" : ""}${e}`;
 
     return this.createResponse({
-      question: `Którym wyrazem ciągu $$(${formula})$$ jest liczba $$${X}$$?`,
+      question: `Ciąg $$(${t1}, ${t2}, ${t3})$$ jest arytmetyczny. Wtedy $$x$$ jest równe:`,
+      latex: ``,
+      image: null,
+      variables: { x },
+      correctAnswer: `${x}`,
+      distractors: [`${x + 1}`, `${-x}`, `${0}`],
+      steps: [
+        `Dla ciągu arytmetycznego zachodzi: $$2b = a + c$$ (podwojony środkowy to suma skrajnych).`,
+        `$$2(${t2}) = (${t1}) + (${t3})$$`,
+        `$$${2 * b_coeff}x = x ${a >= 0 ? "+" : ""}${a} + ${d_real}x ${e >= 0 ? "+" : ""}${e}$$`,
+        `$$${2 * b_coeff}x = ${1 + d_real}x ${a + e >= 0 ? "+" : ""}${a + e}$$`,
+        `$$${2 * b_coeff - (1 + d_real)}x = ${a + e}$$`,
+        `$$x = ${x}$$`,
+      ],
+    });
+  }
+
+  // --- 3. CIĄG GEOMETRYCZNY Z "X" (ALGEBRAICZNY) ---
+  generateGeometricAlgebraic() {
+    // (x, x+3, x+9) nie działa zawsze.
+    // Środkowy^2 = Lewy * Prawy
+    // (x+a)^2 = x * (x+b)
+    // x^2 + 2ax + a^2 = x^2 + bx
+    // 2ax + a^2 = bx
+    // a^2 = (b - 2a)x
+    // x = a^2 / (b - 2a)
+
+    // Niech a=3. a^2=9. b-2a musi być dzielnikiem 9 (np. 1, 3, 9).
+    // b-6 = 1 -> b=7. x = 9/1 = 9.
+    // Sprawdźmy: (9+3)^2 = 144. 9*(9+7) = 9*16 = 144. OK!
+
+    const a = MathUtils.randomElement([2, 3, 4, 5]);
+    const div = MathUtils.randomElement([1, a]); // dzielnik a^2
+    const b_minus_2a = div;
+    const b = b_minus_2a + 2 * a;
+    const x = (a * a) / div;
+
+    const t1 = `x`;
+    const t2 = `x + ${a}`;
+    const t3 = `x + ${b}`;
+
+    return this.createResponse({
+      question: `Ciąg $$(${t1}, ${t2}, ${t3})$$ jest geometryczny. Wtedy $$x$$ wynosi:`,
+      latex: ``,
+      image: null,
+      variables: { x, a, b },
+      correctAnswer: `${x}`,
+      distractors: [`${x + a}`, `${x - 1}`, `${a}`],
+      steps: [
+        `Własność ciągu geometrycznego: $$(\\text{środkowy})^2 = \\text{lewy} \\cdot \\text{prawy}$$`,
+        `$$(${t2})^2 = x \\cdot (${t3})$$`,
+        `$$x^2 + ${2 * a}x + ${a * a} = x^2 + ${b}x$$`,
+        `$$${2 * a}x + ${a * a} = ${b}x$$`,
+        `$$${a * a} = ${b}x - ${2 * a}x = ${b - 2 * a}x$$`,
+        `$$x = ${x}$$`,
+      ],
+    });
+  }
+
+  // --- 4. MONOTONICZNOŚĆ CIĄGU ---
+  generateSequenceMonotonicity() {
+    // an = an + b (arytmetyczny).
+    const a = MathUtils.randomElement([-3, -2, 2, 3]); // Unikamy 1 i -1 dla czytelności
+    const b = MathUtils.randomInt(-5, 5);
+
+    const type = a > 0 ? "rosnący" : "malejący";
+    const formula = `a_n = ${a}n ${b >= 0 ? "+" : ""}${b}`;
+
+    return this.createResponse({
+      question: `Ciąg określony wzorem $$${formula}$$ jest:`,
       latex: formula,
       image: null,
-      variables: { n, X },
-      correctAnswer: `${n}`,
-      distractors: [
-        `${n + 1}`,
-        `${n - 1}`,
-        type === "quadratic" && b !== 0 ? `${Math.abs(n + b)}` : `${n + 2}`,
-      ], // Drugie miejsce zerowe paraboli
+      variables: { a, b, type },
+      correctAnswer: type,
+      distractors: [a > 0 ? "malejący" : "rosnący", "stały", "niemonotoniczny"],
       steps: [
-        `Musimy rozwiązać równanie $$a_n = ${X}$$, pamiętając, że $$n$$ musi być liczbą naturalną dodatnią ($$n \\ge 1$$).`,
-        `$$${formula.split("=")[1]} = ${X}$$`,
-        type === "linear"
-          ? `$$${a}n = ${X - b} \\implies n = ${n}$$`
-          : `$$n^2 ${b >= 0 ? "+" : ""}${b}n ${c - X >= 0 ? "+" : ""}${c - X} = 0$$ \n(Obliczamy deltę i szukamy dodatniego n)`,
-        type === "quadratic"
-          ? `$$\\Delta = (${b})^2 - 4\\cdot 1 \\cdot (${c - X}) = ${b * b} - ${4 * (c - X)} = ${b * b - 4 * (c - X)}$$`
-          : ``,
-        `Otrzymujemy $$n = ${n}$$. (Drugie rozwiązanie odrzucamy jeśli nie jest naturalne dodatnie).`,
-        `Odp: Jest to wyraz nr $$${n}$$`,
+        `Badamy różnicę $$a_{n+1} - a_n$$.`,
+        `$$a_{n+1} = ${a}(n+1) ${b >= 0 ? "+" : ""}${b} = ${a}n + ${a} ${b >= 0 ? "+" : ""}${b}$$`,
+        `$$a_{n+1} - a_n = (${a}n + ${a + b}) - (${a}n ${b >= 0 ? "+" : ""}${b}) = ${a}$$`,
+        `Różnica $$r = ${a}$$ jest ${a > 0 ? "dodatnia" : "ujemna"}, więc ciąg jest ${type}.`,
       ],
     });
   }
 
-  // --- NOWOŚĆ 4: ILE WYRAZÓW SPEŁNIA WARUNEK? ---
-  generateCountTerms() {
-    // Ile wyrazów ciągu an = -n^2 + 10n - 5 jest większych od -20?
-    // Zawsze dobieramy tak, żeby delta była ładna i przedział jasny.
+  // --- 5. DODATNIE WYRAZY CIĄGU KWADRATOWEGO ---
+  generateQuadraticSequencePos() {
+    // Ile wyrazów an = -n^2 + bn + c jest dodatnich?
+    // Parabola w dół. Pierwiastki muszą być dodatnie.
+    // np. -(n-1)(n-8) = - (n^2 - 9n + 8) = -n^2 + 9n - 8.
+    // Dodatnie dla n in (1, 8) -> 2,3,4,5,6,7 (6 wyrazów).
 
-    // Najprościej: Ciąg malejący a_n = -2n + 20. Ile wyrazów jest dodatnich?
-    // -2n + 20 > 0 -> 20 > 2n -> 10 > n. Czyli wyrazy 1..9. Odp: 9.
+    const x1 = MathUtils.randomInt(1, 3); // pierwszy pierwiastek (mały)
+    const diff = MathUtils.randomInt(3, 7);
+    const x2 = x1 + diff; // drugi pierwiastek
 
-    const a = -MathUtils.randomInt(2, 5); // Ujemne, żeby ciąg malał
-    const b = MathUtils.randomInt(20, 50); // Duży start
+    // Wzór: -(n - x1)(n - x2) = -n^2 + (x1+x2)n - x1*x2
+    const b = x1 + x2;
+    const c = -(x1 * x2);
 
-    // a_n = an + b. Pytanie: Ile wyrazów dodatnich?
-    // an + b > 0 => an > -b => n < -b/a
+    // Liczba wyrazów dodatnich: liczby całkowite w przedziale (x1, x2)
+    // count = ceil(x2) - floor(x1) - 1 ... ale x1, x2 są int
+    const count = x2 - x1 - 1;
 
-    const limit = -b / a;
-    const count = Math.ceil(limit) - 1; // n musi być mniejsze ostro lub równe... zależy od pytania.
-    // Ustalmy pytanie "dodatnich" (>0)
-    // Jeśli limit = 5, to n < 5 => n in {1,2,3,4} => 4 wyrazy.
-    // Jeśli limit = 5.5, to n < 5.5 => n in {1..5} => 5 wyrazów.
-
-    const formula = `a_n = ${a}n + ${b}`;
+    const formula = `-n^2 + ${b}n ${c}`;
 
     return this.createResponse({
-      question: `Ile wyrazów ciągu określonego wzorem $$${formula}$$ jest dodatnich?`,
+      question: `Ile wyrazów ciągu $$a_n = ${formula}$$ jest dodatnich?`,
       latex: formula,
       image: null,
-      variables: { a, b, count },
+      variables: { x1, x2, count },
       correctAnswer: `${count}`,
-      distractors: [`${count + 1}`, `${count - 1}`, `${Math.floor(limit)}`],
+      distractors: [`${count + 1}`, `${count + 2}`, `${x2}`],
       steps: [
-        `Szukamy takich $$n \\ge 1$$, dla których $$a_n > 0$$.`,
-        `$$${a}n + ${b} > 0$$`,
-        `$$${a}n > ${-b} \\quad / :(${a})$$ (Zmieniamy znak nierówności!)`,
-        `$$n < ${parseFloat(limit.toFixed(2))}$$`,
-        `Ponieważ $$n$$ musi być liczbą naturalną ($$1, 2, 3...$$), to warunek spełniają liczby: $$1, 2, ..., ${count}$$.`,
-        `Odp: Jest $$${count}$$ takich wyrazów.`,
+        `Rozwiązujemy nierówność $$a_n > 0$$ dla $$n \\ge 1$$.`,
+        `$$-n^2 + ${b}n ${c} > 0$$`,
+        `Miejsca zerowe paraboli: $$\\Delta = ...$$ $$n_1 = ${x1}, n_2 = ${x2}$$.`,
+        `Parabola ma ramiona w dół, więc wartości dodatnie są pomiędzy pierwiastkami: $$n \\in (${x1}, ${x2})$$.`,
+        `Liczby naturalne w tym przedziale to: ${count === 0 ? "brak" : Array.from({ length: count }, (_, i) => x1 + 1 + i).join(", ")}.`,
+        `Odp: $$${count}$$`,
       ],
     });
   }
 
-  // --- STARE WARIANTY (BEZ ZMIAN) ---
+  // --- 6. ŚREDNIA WYRAZÓW CIĄGU ---
+  generateSequenceAverage() {
+    // Średnia arytmetyczna wyrazów a1, ..., a_n wynosi S. Oblicz sumę/a1/r.
+    // Np. średnia 5 wyrazów ciągu arytm. to wyraz środkowy a3.
+    const n = 5; // nieparzysta, łatwiej
+    const middle = MathUtils.randomInt(4, 10); // a3
+    const r = MathUtils.randomInt(2, 5);
+    const a1 = middle - 2 * r;
+
+    const avg = middle; // Dla arytmetycznego śr. arytm = środkowy (dla nieparzystych n)
+
+    return this.createResponse({
+      question: `Średnia arytmetyczna pięciu początkowych wyrazów ciągu arytmetycznego wynosi $$${avg}$$. Pierwszy wyraz tego ciągu to $$${a1}$$. Różnica tego ciągu jest równa:`,
+      latex: `\\bar{x}=${avg}, a_1=${a1}`,
+      image: null,
+      variables: { a1, avg, r },
+      correctAnswer: `${r}`,
+      distractors: [`${r + 1}`, `${avg - a1}`, `${r * 2}`],
+      steps: [
+        `Średnia arytmetyczna $$n$$ początkowych wyrazów ciągu arytmetycznego to $$\\frac{S_n}{n}$$.`,
+        `Dla $$n=5$$ jest to $$a_3$$ (wyraz środkowy). Zatem $$a_3 = ${avg}$$.`,
+        `Wzór: $$a_3 = a_1 + 2r$$.`,
+        `$$${avg} = ${a1} + 2r \\implies 2r = ${avg - a1} \\implies r = ${r}$$`,
+      ],
+    });
+  }
+
+  // --- 7. ANALIZA WZORU NA SUMĘ ---
+  generateSumFormulaAnalysis() {
+    // Sn = n^2 - 2n. Oblicz a_n lub a3.
+    // a3 = S3 - S2.
+    const a = MathUtils.randomInt(1, 3);
+    const b = MathUtils.randomInt(1, 5);
+    // Sn = a*n^2 - b*n
+    const n = 3; // Liczymy a3
+
+    const S3 = a * 3 * 3 - b * 3;
+    const S2 = a * 2 * 2 - b * 2;
+    const a3 = S3 - S2;
+
+    const formula = `S_n = ${a === 1 ? "" : a}n^2 - ${b}n`;
+
+    return this.createResponse({
+      question: `Suma $$n$$ początkowych wyrazów ciągu liczbowego określona jest wzorem $$${formula}$$ dla $$n \\ge 1$$. Trzeci wyraz tego ciągu jest równy:`,
+      latex: formula,
+      image: null,
+      variables: { S3, S2, a3 },
+      correctAnswer: `${a3}`,
+      distractors: [`${S3}`, `${S3 + S2}`, `${a * 3 * 3 + b * 3}`],
+      steps: [
+        `Wyraz $$a_n = S_n - S_{n-1}$$. Dla $$n=3$$: $$a_3 = S_3 - S_2$$.`,
+        `$$S_3 = ${a}\\cdot 3^2 - ${b}\\cdot 3 = ${S3}$$`,
+        `$$S_2 = ${a}\\cdot 2^2 - ${b}\\cdot 2 = ${S2}$$`,
+        `$$a_3 = ${S3} - (${S2}) = ${a3}$$`,
+      ],
+    });
+  }
+
+  // =================================================================
+  // STARE METODY (BEZ ZMIAN)
+  // =================================================================
+
   generateNthTerm() {
-    // a_n = an^2 + bn + c
     const a = MathUtils.randomInt(-2, 2) || 1;
     const b = MathUtils.randomInt(-5, 5);
     const c = MathUtils.randomInt(-10, 10);
@@ -278,6 +397,68 @@ class SequencesGenerator extends BaseGenerator {
       steps: [
         `$$${vm} - ${vk} = (${m}-${k})r \\implies ${vm - vk} = ${m - k}r \\implies r=${r}$$`,
       ],
+    });
+  }
+  generateArithmeticSum() {
+    const n = MathUtils.randomInt(5, 20);
+    const a1 = MathUtils.randomInt(-10, 10);
+    const r = MathUtils.randomInt(-5, 5) || 2;
+    const an = a1 + (n - 1) * r;
+    const sum = ((a1 + an) / 2) * n;
+    return this.createResponse({
+      question: `Oblicz sumę $$${n}$$ początkowych wyrazów ciągu arytmetycznego, gdzie $$a_1=${a1}, r=${r}$$.`,
+      latex: `S_${n}=?`,
+      image: null,
+      variables: { a1, r, n },
+      correctAnswer: `${sum}`,
+      distractors: [`${sum + 10}`, `${sum * 2}`, `${(a1 + an) * n}`],
+      steps: [
+        `$$a_{${n}} = ${an}$$`,
+        `$$S_{${n}} = \\frac{${a1}+${an}}{2} \\cdot ${n} = ${sum}$$`,
+      ],
+    });
+  }
+  generateGeometricSum() {
+    const n = 4,
+      q = 2,
+      a1 = 3;
+    const sum = (a1 * (1 - Math.pow(q, n))) / (1 - q);
+    return this.createResponse({
+      question: `Suma 4 wyrazów ciągu geom. $$a_1=3, q=2$$.`,
+      latex: ``,
+      image: null,
+      variables: {},
+      correctAnswer: `${sum}`,
+      distractors: [`${sum + 1}`, `30`, `15`],
+      steps: [`Wzór na Sn.`],
+    });
+  }
+  generateWhichTerm() {
+    const n = 5,
+      a = 2,
+      b = 1;
+    const X = a * n + b;
+    return this.createResponse({
+      question: `Którym wyrazem ciągu $$a_n=${a}n+${b}$$ jest liczba $$${X}$$?`,
+      latex: ``,
+      image: null,
+      variables: {},
+      correctAnswer: `${n}`,
+      distractors: [`${n + 1}`, `${n - 1}`, `${X}`],
+      steps: [`$$${a}n+${b}=${X} \\implies n=${n}$$`],
+    });
+  }
+  generateCountTerms() {
+    const a = -2,
+      b = 20; // an = -2n+20. >0 dla n < 10. 9 wyrazów.
+    return this.createResponse({
+      question: `Ile wyrazów ciągu $$a_n=-2n+20$$ jest dodatnich?`,
+      latex: ``,
+      image: null,
+      variables: {},
+      correctAnswer: `9`,
+      distractors: [`10`, `8`, `11`],
+      steps: [`-2n+20 > 0 => n < 10`],
     });
   }
 }
