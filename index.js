@@ -9,6 +9,8 @@ const AlgebraGenerator = require("./src/engine/generators/algebra/AlgebraGenerat
 const PlanimetryGenerator = require("./src/engine/generators/geometry/PlanimetryGenerator");
 const StereometryGenerator = require("./src/engine/generators/geometry/StereometryGenerator");
 const StatisticsGenerator = require("./src/engine/generators/statistics/StatisticsGenerator");
+const FunctionsGeneralGenerator = require("./src/engine/generators/functions/FunctionsGeneralGenerator");
+const ExamGenerator = require("./src/engine/generators/ExamGenerator");
 
 const problems = require("./problems.json");
 
@@ -243,5 +245,28 @@ app.get("/api/v2/generator/statistics", (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Błąd generatora statystyki" });
+  }
+});
+
+app.get("/api/v2/generator/functions-general", (req, res) => {
+  try {
+    const difficulty = req.query.difficulty || "medium";
+    const generator = new FunctionsGeneralGenerator(difficulty);
+    const problem = generator.generate();
+    res.json(problem);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Błąd generatora funkcji" });
+  }
+});
+
+app.get("/api/v2/exam/full", (req, res) => {
+  try {
+    const generator = new ExamGenerator();
+    const exam = generator.generateExam();
+    res.json(exam);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Błąd generowania egzaminu" });
   }
 });
