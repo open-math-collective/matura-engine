@@ -4,6 +4,7 @@ const cors = require("cors");
 const QuadraticGenerator = require("./src/engine/generators/functions/QuadraticGenerator");
 const OptimizationGenerator = require("./src/engine/generators/functions/OptimizationGenerator");
 const AnalyticGenerator = require("./src/engine/generators/geometry/AnalyticGenerator");
+const SequencesGenerator = require("./src/engine/generators/sequences/SequencesGenerator");
 
 const problems = require("./problems.json");
 
@@ -178,5 +179,17 @@ app.get("/api/v2/generator/analytic", (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Błąd generatora geometrii" });
+  }
+});
+
+app.get("/api/v2/generator/sequences", (req, res) => {
+  try {
+    const difficulty = req.query.difficulty || "medium";
+    const generator = new SequencesGenerator(difficulty);
+    const problem = generator.generate();
+    res.json(problem);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Błąd generatora ciągów" });
   }
 });
