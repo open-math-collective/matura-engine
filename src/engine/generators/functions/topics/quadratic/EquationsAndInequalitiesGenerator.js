@@ -4,9 +4,24 @@ const SVGUtils = require("../../../../utils/SVGUtils");
 
 class EquationsAndInequalitiesGenerator extends BaseGenerator {
   generateInequalityProblem() {
-    const x1 = MathUtils.randomInt(-5, 4);
-    const x2 = x1 + MathUtils.randomInt(2, 6);
-    const a = MathUtils.randomElement([-1, 1]);
+    let rootRange, aList;
+
+    if (this.difficulty === "easy") {
+      rootRange = [-3, 3];
+      aList = [-1, 1];
+    } else if (this.difficulty === "hard") {
+      rootRange = [-8, 8];
+      aList = [-2, -1, 1, 2, 3];
+    } else {
+      rootRange = [-5, 5];
+      aList = [-1, 1, 2];
+    }
+
+    const x1 = MathUtils.randomInt(rootRange[0], rootRange[1]);
+    let x2 = MathUtils.randomInt(rootRange[0], rootRange[1]);
+    while (x1 === x2) x2 = MathUtils.randomInt(rootRange[0], rootRange[1]);
+
+    const a = MathUtils.randomElement(aList);
     const b = -a * (x1 + x2);
     const c = a * x1 * x2;
     const sign = MathUtils.randomElement([">", "<", ">=", "<="]);
@@ -16,10 +31,14 @@ class EquationsAndInequalitiesGenerator extends BaseGenerator {
     const isCl = sign.includes("=");
     const brL = isCl ? "\\langle" : "(";
     const brR = isCl ? "\\rangle" : ")";
+
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+
     const res =
       isUp !== isGr
-        ? `${brL}${x1}, ${x2}${brR}`
-        : `(-\\infty, ${x1}${brR} \\cup ${brL}${x2}, \\infty)`;
+        ? `${brL}${minX}, ${maxX}${brR}`
+        : `(-\\infty, ${minX}${brR} \\cup ${brL}${maxX}, \\infty)`;
 
     return this.createResponse({
       question: "Rozwiąż nierówność:",
@@ -38,12 +57,12 @@ class EquationsAndInequalitiesGenerator extends BaseGenerator {
       variables: { x1, x2 },
       correctAnswer: `x \\in ${res}`,
       distractors: [
-        `x \\in ${res.includes("cup") ? `(${x1},${x2})` : `R\\setminus(${x1},${x2})`}`,
+        `x \\in ${res.includes("cup") ? `(${minX},${maxX})` : `R\\setminus(${minX},${maxX})`}`,
         `x \\in R`,
         `x \\in \\emptyset`,
       ],
       steps: [
-        `Miejsca zerowe: ${x1}, ${x2}`,
+        `Miejsca zerowe: ${minX}, ${maxX}`,
         `Parabola ${a > 0 ? "uśmiechnięta" : "smutna"}`,
         `Odp: ${res}`,
       ],
@@ -67,39 +86,88 @@ class EquationsAndInequalitiesGenerator extends BaseGenerator {
   }
 
   generateVietaProblem() {
-    const a = MathUtils.randomElement([-1, 1]);
+    let aList;
+    if (this.difficulty === "easy") {
+      aList = [-1, 1]; // a=1 -> sum = -b
+    } else if (this.difficulty === "hard") {
+      aList = [-3, -2, 2, 3, 4];
+    } else {
+      aList = [-2, 2];
+    }
+
+    const a = MathUtils.randomElement(aList);
     const x1 = MathUtils.randomInt(-5, 5);
     const x2 = MathUtils.randomInt(-5, 5);
     const b = -a * (x1 + x2);
     const c = a * x1 * x2;
-    const sum = -b / a;
-    const prod = c / a;
+
+    const formatFrac = (num, den) =>
+      num % den === 0 ? `${num / den}` : `\\frac{${num}}{${den}}`;
+
+    const sum = formatFrac(-b, a);
+    const prod = formatFrac(c, a);
+
     return this.createResponse({
       question: `Suma i iloczyn pierwiastków równania $$${MathUtils.formatPolynomial(a, b, c)} = 0$$:`,
       latex: ``,
       image: null,
       variables: {},
       correctAnswer: `${sum}, ${prod}`,
-      distractors: [`${-sum}, ${prod}`, `${sum}, ${-prod}`, `${prod}, ${sum}`],
-      steps: [`Suma = -b/a`, `Iloczyn = c/a`],
+      distractors: [
+        `${formatFrac(b, a)}, ${prod}`, // bad sign of sum
+        `${sum}, ${formatFrac(-c, a)}`, // bad sign of product
+        `${prod}, ${sum}`, // swapped
+      ],
+      steps: [`Suma = $$-b/a = ${sum}$$`, `Iloczyn = $$c/a = ${prod}$$`],
     });
   }
 
   generateFormulaFromVertexProblem() {
-    const p = 1,
-      q = -3,
-      a = 1,
-      x = 2,
-      y = -2; // Simplified logic for brevity
-    const formula = `f(x) = (x-1)^2 - 3`;
+    // y = a(x-p)^2 + q
+    let pRange, qRange, aList;
+
+    if (this.difficulty === "easy") {
+      pRange = [1, 3];
+      qRange = [1, 3];
+      aList = [1];
+    } else if (this.difficulty === "hard") {
+      pRange = [-5, 5];
+      qRange = [-5, 5];
+      aList = [-2, 2, 3];
+    } else {
+      pRange = [-3, 3];
+      qRange = [-3, 3];
+      aList = [-1, 1];
+    }
+
+    const p = MathUtils.randomInt(pRange[0], pRange[1]);
+    const q = MathUtils.randomInt(qRange[0], qRange[1]);
+    const a = MathUtils.randomElement(aList);
+
+    // A = (x, y)
+    // x = p + dx (dx small)
+    const dx = 1;
+    const x = p + dx;
+    const y = a * dx * dx + q;
+
+    const aStr = a === 1 ? "" : a === -1 ? "-" : a;
+    const pSign = p > 0 ? "-" : "+";
+    const qSign = q >= 0 ? "+" : "";
+
+    const formula = `f(x) = ${aStr}(x ${pSign} ${Math.abs(p)})^2 ${qSign}${q}`;
+
     return this.createResponse({
-      question: `Wierzchołek W(1,-3), punkt A(2,-2). Wzór:`,
+      question: `Wierzchołkiem paraboli jest punkt $$W(${p},${q})$$, a jej wykres przechodzi przez punkt $$A(${x},${y})$$. Wzór tej funkcji w postaci kanonicznej to:`,
       latex: ``,
       image: null,
       variables: {},
       correctAnswer: formula,
-      distractors: [`f(x)=(x+1)^2-3`, `f(x)=(x-1)^2+3`, `f(x)=x^2-3`],
-      steps: [`Postać kanoniczna.`],
+      distractors: [
+        `f(x) = ${aStr}(x ${pSign === "-" ? "+" : "-"} ${Math.abs(p)})^2 ${qSign}${q}`, // bad p sign
+        `f(x) = ${-a}(x ${pSign} ${Math.abs(p)})^2 ${qSign}${q}`, // bad a sign
+        `f(x) = (x ${pSign} ${Math.abs(p)})^2 ${qSign}${q}`, // a=1 (missing)
+      ],
+      steps: [`Postać kanoniczna. Podstawiamy W i A, wyliczamy a.`],
     });
   }
 
@@ -117,23 +185,42 @@ class EquationsAndInequalitiesGenerator extends BaseGenerator {
   }
 
   generateProductToGeneralProblem() {
-    const b = -2,
-      c = -3;
+    const x1 = MathUtils.randomInt(-4, 4);
+    const x2 = MathUtils.randomInt(-4, 4);
+    const a = MathUtils.randomElement([1, -1, 2]);
+
+    const b = -a * (x1 + x2);
+    const c = a * x1 * x2;
+
+    const formula = `f(x)=${a === 1 ? "" : a}(x${x1 > 0 ? "-" : "+"}${Math.abs(x1)})(x${x2 > 0 ? "-" : "+"}${Math.abs(x2)})`;
+
     return this.createResponse({
-      question: `Funkcja $$f(x)=(x+1)(x-3)$$. Współczynnik b:`,
+      question: `Funkcja $$${formula}$$. Współczynnik b we wzorze ogólnym:`,
       latex: ``,
       image: null,
       variables: {},
       correctAnswer: `${b}`,
-      distractors: [`${c}`, `2`, `0`],
+      distractors: [`${c}`, `${-b}`, `${a}`],
       steps: [`Wymnażamy nawiasy.`],
     });
   }
 
   generateCoefficients() {
-    const p = MathUtils.randomInt(-4, 4);
-    const q = MathUtils.randomInt(-4, 4);
-    const a = MathUtils.randomElement([-2, -1, 1, 2]);
+    let aList, range;
+    if (this.difficulty === "easy") {
+      aList = [-1, 1];
+      range = [-3, 3];
+    } else if (this.difficulty === "hard") {
+      aList = [-2, 2, 3, -3];
+      range = [-6, 6];
+    } else {
+      aList = [-1, 1, 2, -2];
+      range = [-4, 4];
+    }
+
+    const p = MathUtils.randomInt(range[0], range[1]);
+    const q = MathUtils.randomInt(range[0], range[1]);
+    const a = MathUtils.randomElement(aList);
     const b = -2 * a * p;
     const c = a * (p * p) + q;
     return { a, b, c, p, q };

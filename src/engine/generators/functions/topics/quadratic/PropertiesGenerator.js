@@ -4,9 +4,28 @@ const SVGUtils = require("../../../../utils/SVGUtils");
 
 class PropertiesGenerator extends BaseGenerator {
   generateValueRangeProblem() {
-    const { a, b, c, p, q } = this.generateCoefficients();
+    let aList, vertexRange;
+
+    if (this.difficulty === "easy") {
+      aList = [-1, 1];
+      vertexRange = [-3, 3];
+    } else if (this.difficulty === "hard") {
+      aList = [-3, -2, 2, 3, 4];
+      vertexRange = [-8, 8];
+    } else {
+      aList = [-2, -1, 1, 2];
+      vertexRange = [-5, 5];
+    }
+
+    const p = MathUtils.randomInt(vertexRange[0], vertexRange[1]);
+    const q = MathUtils.randomInt(vertexRange[0], vertexRange[1]);
+    const a = MathUtils.randomElement(aList);
+    const b = -2 * a * p;
+    const c = a * p * p + q;
+
     const range =
       a > 0 ? `\\langle ${q}, \\infty )` : `( -\\infty, ${q} \\rangle`;
+
     return this.createResponse({
       question: "Wyznacz zbiór wartości funkcji:",
       latex: `f(x) = ${MathUtils.formatPolynomial(a, b, c)}`,
@@ -14,21 +33,45 @@ class PropertiesGenerator extends BaseGenerator {
       variables: { a, b, c, p, q },
       correctAnswer: range,
       distractors: [
-        a > 0 ? `( -\\infty, ${q} \\rangle` : `\\langle ${q}, \\infty )`,
-        `\\langle ${p}, \\infty )`,
+        a > 0 ? `( -\\infty, ${q} \\rangle` : `\\langle ${q}, \\infty )`, // reversed range
+        `\\langle ${p}, \\infty )`, // misstake q with p
         `\\mathbb{R}`,
       ],
       steps: [
-        `Wierzchołek $$q=${q}$$`,
-        `Ramiona ${a > 0 ? "w górę" : "w dół"}`,
+        `Współczynnik $$a=${a}$$, ramiona skierowane w ${a > 0 ? "górę" : "dół"}.`,
+        `Współrzędna $$q=${q}$$ wierzchołka.`,
+        `Zbiór wartości: $$${range}$$`,
       ],
     });
   }
 
   generateMonotonicityProblem() {
-    const { a, b, c, p, q } = this.generateCoefficients();
+    // (-inf, p> & <p, inf)
+    let aList, pRange;
+
+    if (this.difficulty === "easy") {
+      aList = [-1, 1];
+      pRange = [-3, 3];
+    } else if (this.difficulty === "hard") {
+      aList = [-3, 3];
+      pRange = [-10, 10];
+    } else {
+      aList = [-2, 2];
+      pRange = [-5, 5];
+    }
+
+    const p = MathUtils.randomInt(pRange[0], pRange[1]);
+    const q = MathUtils.randomInt(pRange[0], pRange[1]);
+    const a = MathUtils.randomElement(aList);
+    const b = -2 * a * p;
+    const c = a * p * p + q;
+
     const type = MathUtils.randomElement(["rosnąca", "malejąca"]);
     let interval;
+
+    // a > 0 (U): maleje (-inf, p>, rosnie <p, inf)
+    // a < 0 (n): rosnie (-inf, p>, maleje <p, inf)
+
     if ((a > 0 && type === "rosnąca") || (a < 0 && type === "malejąca")) {
       interval = `\\langle ${p}, \\infty )`;
     } else {
@@ -44,24 +87,38 @@ class PropertiesGenerator extends BaseGenerator {
       distractors: [
         interval.includes("infty") && interval.includes("-")
           ? interval.replace("-", "")
-          : `( -\\infty, ${p} \\rangle`,
-        `\\langle ${q}, \\infty )`,
+          : `( -\\infty, ${p} \\rangle`, // reversed interval
+        `\\langle ${q}, \\infty )`, // misstake p with q
         `( -\\infty, ${q} \\rangle`,
       ],
-      steps: [`$$p=${p}$$. Ramiona ${a > 0 ? "góra" : "dół"}.`],
+      steps: [
+        `Współrzędna $$p$$ wierzchołka $$p = \\frac{-b}{2a} = ${p}$$.`,
+        `Ramiona ${a > 0 ? "góra" : "dół"}.`,
+      ],
     });
   }
 
   generateMinMaxIntervalProblem() {
+    // f(x) in <start, end>
     const { a, b, c, p, q } = this.generateCoefficients();
-    const isPInside = MathUtils.randomElement([true, false]);
+
+    let isPInside;
+    if (this.difficulty === "easy") isPInside = true;
+    else if (this.difficulty === "hard") isPInside = Math.random() > 0.5;
+    else isPInside = true;
+
     let start, end;
     if (isPInside) {
-      start = p - 1;
-      end = p + 1;
+      start = p - MathUtils.randomInt(1, 2);
+      end = p + MathUtils.randomInt(1, 2);
     } else {
-      start = p + 1;
-      end = p + 3;
+      if (Math.random() > 0.5) {
+        start = p + 1;
+        end = p + 3;
+      } else {
+        end = p - 1;
+        start = end - 2;
+      }
     }
 
     const f_start = a * start * start + b * start + c;
@@ -83,15 +140,32 @@ class PropertiesGenerator extends BaseGenerator {
       correctAnswer: `${ans}`,
       distractors: [`${f_start}`, `${f_end}`, `${q}`],
       steps: [
-        `$$p=${p}$$ ${isPInside ? "należy" : "nie należy"} do przedziału.`,
+        `Wierzchołek $$p=${p}$$ ${start <= p && p <= end ? "należy" : "nie należy"} do przedziału.`,
+        `Obliczamy wartości na krańcach: $$f(${start})=${f_start}, f(${end})=${f_end}$$` +
+          (start <= p && p <= end
+            ? ` oraz w wierzchołku $$f(${p})=${f_p}$$`
+            : ``) +
+          `.`,
       ],
     });
   }
 
   generateCoefficients() {
-    const p = MathUtils.randomInt(-4, 4);
-    const q = MathUtils.randomInt(-4, 4);
-    const a = MathUtils.randomElement([-2, -1, 1, 2]);
+    let pRange, aList;
+    if (this.difficulty === "easy") {
+      pRange = [-3, 3];
+      aList = [-1, 1];
+    } else if (this.difficulty === "hard") {
+      pRange = [-6, 6];
+      aList = [-2, 2, 3];
+    } else {
+      pRange = [-4, 4];
+      aList = [-1, 1, 2];
+    }
+
+    const p = MathUtils.randomInt(pRange[0], pRange[1]);
+    const q = MathUtils.randomInt(pRange[0], pRange[1]);
+    const a = MathUtils.randomElement(aList);
     const b = -2 * a * p;
     const c = a * (p * p) + q;
     return { a, b, c, p, q };
