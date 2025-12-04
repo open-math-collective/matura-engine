@@ -3,35 +3,68 @@ const MathUtils = require("../../../utils/MathUtils");
 
 class NumbersGenerator extends BaseGenerator {
   generatePercentProblem() {
-    const p = MathUtils.randomElement([10, 20, 25, 30, 40, 50]);
-    const originalPrice = MathUtils.randomInt(2, 20) * 10;
+    let pList, priceRange;
+
+    if (this.difficulty === "easy") {
+      pList = [10, 20, 25, 50];
+      priceRange = [20, 100];
+    } else if (this.difficulty === "hard") {
+      pList = [5, 15, 35, 45, 12, 8];
+      priceRange = [150, 500];
+    } else {
+      pList = [10, 20, 25, 30, 40, 50];
+      priceRange = [20, 200];
+    }
+
+    const p = MathUtils.randomElement(pList);
+    const originalPrice =
+      MathUtils.randomInt(priceRange[0] / 10, priceRange[1] / 10) * 10;
+
     const finalPrice = originalPrice * (1 - p / 100);
 
+    const finalPriceStr = Number.isInteger(finalPrice)
+      ? `${finalPrice}`
+      : finalPrice.toFixed(2);
+
     return this.createResponse({
-      question: `Cena towaru została obniżona o $$${p}\\%$$. Po obniżce towar kosztuje $$${finalPrice}$$ zł. Cena początkowa wynosiła:`,
+      question: `Cena towaru została obniżona o $$${p}\\%$$. Po obniżce towar kosztuje $$${finalPriceStr}$$ zł. Cena początkowa wynosiła:`,
       latex: `p = ${p}\\%`,
       image: null,
       variables: { p, originalPrice, finalPrice },
       correctAnswer: `${originalPrice} zł`,
       distractors: [
-        `${finalPrice * (1 + p / 100)} zł`,
+        `${(finalPrice * (1 + p / 100)).toFixed(2).replace(".00", "")} zł`,
         `${originalPrice - 10} zł`,
-        `${finalPrice + p} zł`,
+        `${(finalPrice + p).toFixed(2).replace(".00", "")} zł`,
       ],
       steps: [
-        `$$(100\\% - ${p}\\%)x = ${finalPrice} \\implies ${(100 - p) / 100}x = ${finalPrice} \\implies x = ${originalPrice}$$`,
+        `$$(100\\% - ${p}\\%)x = ${finalPriceStr} \\implies ${(100 - p) / 100}x = ${finalPriceStr} \\implies x = ${originalPrice}$$`,
       ],
     });
   }
 
   generatePercentRelations() {
-    const scenarios = [
-      { p: 25, b_frac: "0.8" },
-      { p: 50, b_frac: "\\frac{2}{3}" },
-      { p: 60, b_frac: "0.625" },
-      { p: 100, b_frac: "0.5" },
-      { p: 150, b_frac: "0.4" },
-    ];
+    let scenarios;
+
+    if (this.difficulty === "easy") {
+      scenarios = [
+        { p: 100, b_frac: "0.5" }, // 2x -> 0.5
+        { p: 50, b_frac: "\\frac{2}{3}" }, // 1.5x -> 2/3
+      ];
+    } else if (this.difficulty === "hard") {
+      scenarios = [
+        { p: 150, b_frac: "0.4" }, // 2.5x -> 0.4
+        { p: 125, b_frac: "\\frac{4}{9}" }, // 2.25x -> 4/9
+        { p: 300, b_frac: "0.25" }, // 4x -> 0.25
+      ];
+    } else {
+      scenarios = [
+        { p: 25, b_frac: "0.8" },
+        { p: 60, b_frac: "0.625" },
+        { p: 20, b_frac: "\\frac{5}{6}" },
+      ];
+    }
+
     const s = MathUtils.randomElement(scenarios);
 
     return this.createResponse({
@@ -42,7 +75,9 @@ class NumbersGenerator extends BaseGenerator {
       correctAnswer: `y = ${s.b_frac}x`,
       distractors: [
         `y = ${1 + s.p / 100}x`,
-        `y = ${1 - s.p / 100}x`,
+        `y = ${Math.abs(1 - s.p / 100)
+          .toFixed(2)
+          .replace("0.", ".")}x`,
         `y = ${s.p / 100}x`,
       ],
       steps: [
@@ -53,36 +88,70 @@ class NumbersGenerator extends BaseGenerator {
   }
 
   generateErrorProblem() {
-    const errorPercent = MathUtils.randomElement([1, 2, 5, 10, 20, 25]);
-    const x = MathUtils.randomElement([10, 20, 25, 40, 50, 80, 100]);
+    let errorList, xRange;
+
+    if (this.difficulty === "easy") {
+      errorList = [1, 2, 5, 10];
+      xRange = [10, 100];
+    } else if (this.difficulty === "hard") {
+      errorList = [0.5, 1.5, 2.5, 12];
+      xRange = [150, 500];
+    } else {
+      errorList = [5, 10, 20, 25];
+      xRange = [20, 200];
+    }
+
+    const errorPercent = MathUtils.randomElement(errorList);
+    const x = MathUtils.randomInt(xRange[0] / 10, xRange[1] / 10) * 10;
+
     const delta = x * (errorPercent / 100);
     const isExcess = MathUtils.randomElement([true, false]);
     const y = isExcess ? x + delta : x - delta;
 
+    const yStr = Number.isInteger(y) ? `${y}` : y.toFixed(2);
+    const deltaStr = Number.isInteger(delta) ? `${delta}` : delta.toFixed(2);
+
     return this.createResponse({
-      question: `Liczba $$y=${y}$$ jest przybliżeniem liczby $$x=${x}$$. Błąd względny wynosi:`,
-      latex: `x=${x}, y=${y}`,
+      question: `Liczba $$y=${yStr}$$ jest przybliżeniem liczby $$x=${x}$$. Błąd względny wynosi:`,
+      latex: `x=${x}, y=${yStr}`,
       image: null,
       variables: { x, y },
       correctAnswer: `${errorPercent}\\%`,
       distractors: [
-        `${delta}\\%`,
+        `${deltaStr}\\%`,
         `${100 - errorPercent}\\%`,
         `${errorPercent / 10}\\%`,
       ],
       steps: [
-        `Błąd bezwzględny: $$|x-y|=${delta}$$`,
-        `Błąd względny: $$\\frac{${delta}}{${x}} = ${errorPercent}\\%$$`,
+        `Błąd bezwzględny: $$|x-y|=${deltaStr}$$`,
+        `Błąd względny: $$\\frac{${deltaStr}}{${x}} = ${errorPercent}\\%$$`,
       ],
     });
   }
 
   generateGcdLcm() {
-    const common = MathUtils.randomElement([2, 3, 4, 5, 6, 8, 10, 12]);
-    const m1 = MathUtils.randomInt(1, 5);
-    const m2 = MathUtils.randomInt(1, 5);
-    const a = common * m1 * MathUtils.randomInt(1, 2);
-    const b = common * m2 * MathUtils.randomInt(2, 3);
+    let commonList, mRange;
+
+    if (this.difficulty === "easy") {
+      commonList = [2, 3, 4, 5, 10];
+      mRange = [1, 3];
+    } else if (this.difficulty === "hard") {
+      commonList = [12, 14, 15, 18, 24];
+      mRange = [3, 8];
+    } else {
+      commonList = [4, 6, 8, 9, 12];
+      mRange = [2, 5];
+    }
+
+    const common = MathUtils.randomElement(commonList);
+    const m1 = MathUtils.randomInt(mRange[0], mRange[1]);
+    const m2 = MathUtils.randomInt(mRange[0], mRange[1]);
+
+    // a != b
+    const a = common * m1;
+    let b = common * m2;
+    if (a === b) b += common;
+
     const gcdVal = this.getGCD(a, b);
     const lcmVal = this.getLCM(a, b);
     const mode = MathUtils.randomElement(["gcd", "lcm"]);
@@ -106,7 +175,6 @@ class NumbersGenerator extends BaseGenerator {
     });
   }
 
-  // Helpers
   getGCD(a, b) {
     return b ? this.getGCD(b, a % b) : a;
   }
