@@ -4,12 +4,21 @@ const StereometrySVGUtils = require("./StereometrySVGUtils");
 
 class SolidsOfRevolutionGenerator extends BaseGenerator {
   generateConeProblem() {
-    const triples = [
-      [3, 4, 5],
-      [5, 12, 13],
-      [6, 8, 10],
-      [8, 15, 17],
-    ];
+    let triples;
+    if (this.difficulty === "easy") {
+      triples = [
+        [3, 4, 5],
+        [6, 8, 10],
+      ];
+    } else if (this.difficulty === "hard") {
+      triples = [
+        [8, 15, 17],
+        [9, 12, 15],
+      ];
+    } else {
+      triples = [[5, 12, 13]];
+    }
+
     const [r, h, l] = MathUtils.randomElement(triples);
     const mode = MathUtils.randomElement(["find_l", "find_h"]);
     return this.createResponse({
@@ -34,9 +43,15 @@ class SolidsOfRevolutionGenerator extends BaseGenerator {
   }
 
   generateCylinderProblem() {
-    const r = MathUtils.randomInt(2, 6);
+    let rRange;
+    if (this.difficulty === "easy") rRange = [2, 4];
+    else if (this.difficulty === "hard") rRange = [6, 9];
+    else rRange = [3, 6];
+
+    const r = MathUtils.randomInt(rRange[0], rRange[1]);
     const h = 2 * r;
     const V = r * r * h;
+
     return this.createResponse({
       question: `Przekrój osiowy walca jest kwadratem o boku $$${h}$$. Objętość walca wynosi:`,
       latex: `H=2r=${h}`,
@@ -52,12 +67,21 @@ class SolidsOfRevolutionGenerator extends BaseGenerator {
   }
 
   generateCylinderSectionDiagonal() {
-    const triples = [
-      [3, 4, 5],
-      [6, 8, 10],
-      [5, 12, 13],
-      [8, 15, 17],
-    ];
+    let triples;
+    if (this.difficulty === "easy") {
+      triples = [
+        [3, 4, 5],
+        [6, 8, 10],
+      ];
+    } else if (this.difficulty === "hard") {
+      triples = [
+        [8, 15, 17],
+        [9, 12, 15],
+      ];
+    } else {
+      triples = [[5, 12, 13]];
+    }
+
     const [base, height, diag] = MathUtils.randomElement(triples);
     const isBaseDiameter = MathUtils.randomElement([true, false]);
     const r = isBaseDiameter ? base / 2 : height / 2;
@@ -81,30 +105,45 @@ class SolidsOfRevolutionGenerator extends BaseGenerator {
       steps: [
         `Boki prostokąta: $$a = 2r = ${2 * r}$$, $$b = h = ${h}$$.`,
         `Z twierdzenia Pitagorasa dla przekątnej $$d$$: $$d = \\sqrt{a^2 + b^2}$$`,
-        `$$d = \\sqrt{${2 * r}^2 + ${h}^2} = \\sqrt{${diag * diag}} = ${diag}$$`,
+        `$$d = \\sqrt{${2 * r}^2 + ${h}^2} = \\sqrt{${(2 * r) ** 2} + ${h * h}} = \\sqrt{${diag * diag}} = ${diag}$$`,
       ],
     });
   }
 
   generateSphereProblem() {
-    const r = MathUtils.randomInt(2, 6);
+    let rRange;
+    if (this.difficulty === "easy") rRange = [3, 6];
+    else if (this.difficulty === "hard") rRange = [7, 10];
+    else rRange = [2, 5];
+
+    const r = MathUtils.randomInt(rRange[0], rRange[1]);
     const type = MathUtils.randomElement(["volume", "area"]);
+
     if (type === "volume") {
-      const niceR = MathUtils.randomElement([3, 6]);
-      const V = (4 * Math.pow(niceR, 3)) / 3;
+      let V_str;
+      const num = 4 * Math.pow(r, 3);
+      const den = 3;
+
+      if (num % den === 0) V_str = `${num / den}`;
+      else V_str = `\\frac{${num}}{${den}}`;
+
+      if (this.difficulty === "easy" && r % 3 !== 0) {
+        return this.generateSphereProblem();
+      }
+
       return this.createResponse({
-        question: `Promień kuli jest równy $$${niceR}$$. Objętość tej kuli wynosi:`,
-        latex: `r=${niceR}`,
-        image: StereometrySVGUtils.generateSVG({ type: "sphere", r: niceR }),
-        variables: { r: niceR, V },
-        correctAnswer: `${V}\\pi`,
+        question: `Promień kuli jest równy $$${r}$$. Objętość tej kuli wynosi:`,
+        latex: `r=${r}`,
+        image: StereometrySVGUtils.generateSVG({ type: "sphere", r: r }),
+        variables: { r, V: num / den },
+        correctAnswer: `${V_str}\\pi`,
         distractors: [
-          `${(V * 3) / 4}\\pi`,
-          `${4 * niceR * niceR}\\pi`,
-          `${Math.pow(niceR, 3)}\\pi`,
+          `${(num / 4 / den).toFixed(0)}\\pi`,
+          `${4 * r * r}\\pi`,
+          `${Math.pow(r, 3)}\\pi`,
         ],
         steps: [
-          `$$V = \\frac{4}{3}\\pi r^3 = \\frac{4}{3}\\pi \\cdot ${Math.pow(niceR, 3)} = ${V}\\pi$$`,
+          `$$V = \\frac{4}{3}\\pi r^3 = \\frac{4}{3}\\pi \\cdot ${Math.pow(r, 3)} = ${V_str}\\pi$$`,
         ],
       });
     } else {

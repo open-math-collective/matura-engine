@@ -4,7 +4,12 @@ const StereometrySVGUtils = require("./StereometrySVGUtils");
 
 class CubesGenerator extends BaseGenerator {
   generateCubeProblem() {
-    const a = MathUtils.randomInt(2, 10);
+    let aRange;
+    if (this.difficulty === "easy") aRange = [2, 5];
+    else if (this.difficulty === "hard") aRange = [10, 20];
+    else aRange = [4, 9];
+
+    const a = MathUtils.randomInt(aRange[0], aRange[1]);
     const mode = MathUtils.randomElement(["given_edge", "given_diag"]);
 
     if (mode === "given_edge") {
@@ -38,8 +43,21 @@ class CubesGenerator extends BaseGenerator {
   }
 
   generateCuboidAngle() {
-    const a = MathUtils.randomInt(3, 6);
-    const angle = MathUtils.randomElement([30, 45, 60]);
+    let aRange, angles;
+    if (this.difficulty === "easy") {
+      aRange = [2, 4];
+      angles = [45];
+    } else if (this.difficulty === "hard") {
+      aRange = [5, 8];
+      angles = [30];
+    } else {
+      aRange = [3, 6];
+      angles = [60];
+    }
+
+    const a = MathUtils.randomInt(aRange[0], aRange[1]);
+    const angle = MathUtils.randomElement(angles);
+
     let H_latex;
     if (angle === 45) H_latex = `${a}\\sqrt{2}`;
     else if (angle === 60) H_latex = `${a}\\sqrt{6}`;
@@ -69,9 +87,14 @@ class CubesGenerator extends BaseGenerator {
   }
 
   generateCuboidDiagonal() {
-    const a = MathUtils.randomInt(2, 6);
-    const b = MathUtils.randomInt(2, 6);
-    const c = MathUtils.randomInt(2, 8);
+    let range;
+    if (this.difficulty === "easy") range = [1, 3];
+    else if (this.difficulty === "hard") range = [4, 8];
+    else range = [2, 5];
+
+    const a = MathUtils.randomInt(range[0], range[1]);
+    const b = MathUtils.randomInt(range[0], range[1]);
+    const c = MathUtils.randomInt(range[0], range[1]);
 
     const sumSq = a * a + b * b + c * c;
     const diagStr = Number.isInteger(Math.sqrt(sumSq))
