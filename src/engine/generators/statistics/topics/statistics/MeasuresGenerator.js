@@ -3,50 +3,76 @@ const MathUtils = require("../../../../utils/MathUtils");
 
 class MeasuresGenerator extends BaseGenerator {
   generateBasicStatsProblem() {
-    const count = MathUtils.randomInt(6, 9);
+    let countRange, valRange;
+    if (this.difficulty === "easy") {
+      countRange = [5, 7];
+      valRange = [1, 6];
+    } else if (this.difficulty === "hard") {
+      countRange = [8, 12];
+      valRange = [10, 50];
+    } else {
+      countRange = [6, 9];
+      valRange = [1, 9];
+    }
+
+    const count = MathUtils.randomInt(countRange[0], countRange[1]);
     const numbers = [];
-    for (let i = 0; i < count; i++) numbers.push(MathUtils.randomInt(1, 9));
+    for (let i = 0; i < count; i++)
+      numbers.push(MathUtils.randomInt(valRange[0], valRange[1]));
+
     const mode = MathUtils.randomElement(["mean", "median"]);
     const sorted = [...numbers].sort((a, b) => a - b);
     const sum = numbers.reduce((a, b) => a + b, 0);
 
     let answer,
       steps = [];
+
     if (mode === "mean") {
       const mean = sum / count;
       const meanStr = Number.isInteger(mean)
         ? `${mean}`
-        : `\\frac{${sum}}{${count}}`;
+        : this.difficulty === "easy"
+          ? mean.toFixed(1)
+          : `\\frac{${sum}}{${count}}`;
       answer = meanStr;
       steps = [
-        `Suma: $$${sum}$$`,
-        `Ilość: $$${count}$$`,
+        `Suma liczb: $$${sum}$$`,
+        `Liczba elementów: $$${count}$$`,
         `Średnia: $$${meanStr}$$`,
       ];
     } else {
       const mid = Math.floor(count / 2);
       let medVal;
-      steps.push(`Porządkujemy: $$${sorted.join(", ")}$$`);
+      steps.push(`Porządkujemy liczby: $$${sorted.join(", ")}$$`);
+
       if (count % 2 !== 0) {
         medVal = sorted[mid];
-        steps.push(`Środkowy: $$${medVal}$$`);
+        steps.push(
+          `Liczba elementów nieparzysta. Mediana to środkowy wyraz: $$${medVal}$$`,
+        );
       } else {
-        medVal = (sorted[mid - 1] + sorted[mid]) / 2;
-        steps.push(`Średnia środkowych: $$${medVal}$$`);
+        const v1 = sorted[mid - 1];
+        const v2 = sorted[mid];
+        medVal = (v1 + v2) / 2;
+        steps.push(
+          `Liczba elementów parzysta. Mediana to średnia $$${v1}$$ i $$${v2}$$: $$${medVal}$$`,
+        );
       }
       answer = `${medVal}`;
     }
 
     return this.createResponse({
-      question: `Dany jest zestaw liczb: $$${numbers.join(", ")}$$. ${mode === "mean" ? "Średnia arytmetyczna" : "Mediana"} jest równa:`,
+      question: `Dany jest zestaw liczb: $$${numbers.join(", ")}$$. ${mode === "mean" ? "Średnia arytmetyczna" : "Mediana"} tego zestawu jest równa:`,
       latex: ``,
       image: null,
       variables: { numbers },
       correctAnswer: answer,
       distractors: [
         `${(sum / (count - 1)).toFixed(2)}`,
+        mode === "mean"
+          ? `${sorted[Math.floor(count / 2)]}`
+          : `${(sum / count).toFixed(2)}`,
         `${sorted[0]}`,
-        `${sorted[count - 1]}`,
       ],
       steps: steps,
     });
@@ -55,17 +81,21 @@ class MeasuresGenerator extends BaseGenerator {
   generateModeProblem() {
     const targetMode = MathUtils.randomInt(1, 9);
     const numbers = [targetMode, targetMode, targetMode];
-    for (let i = 0; i < 5; i++) {
+    const noiseCount = this.difficulty === "easy" ? 3 : 7;
+
+    for (let i = 0; i < noiseCount; i++) {
       let n;
       do {
         n = MathUtils.randomInt(1, 9);
       } while (n === targetMode);
       numbers.push(n);
     }
+
     for (let i = numbers.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
     }
+
     return this.createResponse({
       question: `Dominanta zestawu: $$${numbers.join(", ")}$$ wynosi:`,
       latex: ``,
@@ -78,47 +108,53 @@ class MeasuresGenerator extends BaseGenerator {
   }
 
   generateWeightedMeanProblem() {
+    let count;
+    if (this.difficulty === "easy") count = 3;
+    else if (this.difficulty === "hard") count = 5;
+    else count = 4;
+
     const grades = [];
     let num = 0,
       den = 0;
-    const c = 3;
-    for (let i = 0; i < c; i++) {
-      const g = MathUtils.randomInt(2, 5),
-        w = MathUtils.randomInt(1, 3);
+
+    for (let i = 0; i < count; i++) {
+      const g = MathUtils.randomInt(2, 5);
+      const w = MathUtils.randomInt(1, this.difficulty === "hard" ? 4 : 2);
       grades.push({ g, w });
       num += g * w;
       den += w;
     }
+
     const mean = num / den;
     const meanStr = Number.isInteger(mean) ? `${mean}` : mean.toFixed(2);
+
     return this.createResponse({
       question: `Oceny z wagami: ${grades.map((x) => `${x.g} (waga ${x.w})`).join(", ")}. Średnia ważona:`,
       latex: ``,
       image: null,
       variables: { mean },
       correctAnswer: meanStr,
-      distractors: [`${mean + 0.5}`, `${mean - 0.5}`, `${Math.floor(mean)}`],
+      distractors: [
+        `${(mean + 0.5).toFixed(2)}`,
+        `${(mean - 0.5).toFixed(2)}`,
+        `${Math.floor(mean)}`,
+      ],
       steps: [`Licznik: ${num}, Mianownik: ${den}, Wynik: ${meanStr}`],
     });
   }
 
   generateStdDevProblem() {
-    const setType = MathUtils.randomElement([
-      "seq_odd",
-      "seq_even",
-      "symmetric",
-    ]);
     let nums = [],
       mean = 0;
-    if (setType === "seq_odd") {
-      nums = [1, 3, 5, 7, 9];
-      mean = 5;
-    } else if (setType === "seq_even") {
+    if (this.difficulty === "easy") {
+      nums = [1, 3, 5];
+      mean = 3;
+    } else if (this.difficulty === "hard") {
       nums = [2, 4, 6, 8, 10];
       mean = 6;
     } else {
-      nums = [4, 4, 8, 8];
-      mean = 6;
+      nums = [1, 3, 5, 7, 9];
+      mean = 5;
     }
 
     const varianceNum = nums.reduce(
@@ -129,35 +165,44 @@ class MeasuresGenerator extends BaseGenerator {
     const isPerf = Number.isInteger(Math.sqrt(variance));
     const stdDevStr = isPerf ? `${Math.sqrt(variance)}` : `\\sqrt{${variance}}`;
 
+    if (this.difficulty === "easy") {
+      nums = [4, 4, 8, 8];
+      mean = 6;
+    }
+
     return this.createResponse({
       question: `Odchylenie standardowe zestawu danych: $$${nums.join(", ")}$$ jest równe:`,
       latex: ``,
       image: null,
       variables: { nums, mean, variance },
-      correctAnswer: stdDevStr,
+      correctAnswer: this.difficulty === "easy" ? `2` : stdDevStr,
       distractors: [
         `${variance}`,
         `${mean}`,
-        `${isPerf ? Math.sqrt(variance) + 1 : variance + 2}`,
+        `${this.difficulty === "easy" ? 4 : variance + 2}`,
       ],
-      steps: [
-        `Średnia: ${mean}`,
-        `Wariancja: ${variance}`,
-        `Odchylenie: ${stdDevStr}`,
-      ],
+      steps: [`Średnia: ${mean}`, `Wariancja: ${variance}`, `Odchylenie: ...`],
     });
   }
 
   generateMissingNumberMean() {
-    const count = MathUtils.randomInt(4, 6);
+    let count, targetMean;
+    if (this.difficulty === "easy") {
+      count = 4;
+      targetMean = 5;
+    } else {
+      count = 6;
+      targetMean = 12;
+    }
+
     const known = [];
-    for (let i = 0; i < count - 1; i++) known.push(MathUtils.randomInt(1, 10));
-    const targetMean = MathUtils.randomInt(4, 8);
+    for (let i = 0; i < count - 1; i++)
+      known.push(MathUtils.randomInt(1, targetMean * 2));
     const targetSum = count * targetMean;
     const currentSum = known.reduce((a, b) => a + b, 0);
     const x = targetSum - currentSum;
-    const allNums = [...known, "x"];
 
+    const allNums = [...known, "x"];
     for (let i = allNums.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [allNums[i], allNums[j]] = [allNums[j], allNums[i]];
@@ -207,7 +252,7 @@ class MeasuresGenerator extends BaseGenerator {
     const x = sum2 - sum1;
 
     return this.createResponse({
-      question: `Średnia arytmetyczna zestawu $$${n}$$ liczb wynosi $$${S1}$$. Gdy do tego zestawu dopiszemy liczbę $$x$$, to średnia arytmetyczna wzrośnie do $$${S2}$$. Liczba $$x$$ jest równa:`,
+      question: `Średnia arytmetyczna zestawu $$${n}$$ liczb wynosi $$${S1}$$. Gdy do tego zestawu dopiszemy liczbę $$x$$, to średnia wzrośnie do $$${S2}$$. Liczba $$x$$ jest równa:`,
       latex: ``,
       image: null,
       variables: { n, S1, S2, x },
