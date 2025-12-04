@@ -1,84 +1,147 @@
-# [Math Problems API](https://math-api-azure.vercel.app/)
+# Math Problems API 🧮
 
-A free REST API for random math excercises.
+A powerful, modular Node.js REST API engine designed to generate an infinite number of unique mathematical problems. Tailored for the Polish Matura Exam (Basic Level 2025), but applicable to general high school mathematics.
 
-Built with Express.js and hosted on Vercel.
+The system generates problem content, answers, step-by-step solutions in **LaTeX**, and dynamic visualizations in **SVG**.
 
-## Usage
+## ✨ Key Features
 
-### `GET` [https://math-api-azure.vercel.app/random-problem](https://math-api-azure.vercel.app/random-problem)
+* **12 Specialized Modules**: Covering Algebra, Geometry (Analytic, Planimetry, Stereometry), Functions, Statistics, Combinatorics, and more.
+* **Infinite Randomization**: Problems are algorithmically generated (random numbers, variable names, scenarios), ensuring no two requests return the exact same problem.
+* **Dynamic SVG Generation**: On-the-fly creation of function graphs, geometric figures, and statistical charts.
+* **LaTeX Support**: All mathematical formulas are formatted for easy rendering.
+* **Difficulty Levels**: `easy`, `medium`, and `hard` modes that adjust number ranges and problem complexity.
+* **Flexible Retrieval**: Fetch single problems, batches of specific topics, or completely random sets.
+* **Full Exam Simulator**: Generates a complete, balanced exam sheet (~30 tasks).
 
-```js
+## 🚀 Installation & Usage
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/Wolfie-University/math-problems-api.git](https://github.com/Wolfie-University/math-problems-api.git)
+    cd math-problems-api
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Start the server:**
+    ```bash
+    node index.js
+    ```
+    The server runs on port `3333` by default.
+
+## 📡 API Documentation
+
+### Global Parameters
+All generator endpoints support the following query parameters:
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `difficulty` | `string` | `medium` | Complexity level: `easy`, `medium`, or `hard`. |
+| `count` | `number` | `1` | Number of problems to return. If specified, returns an Array. |
+
+---
+
+### 1. Specific Topic Generators
+Generate problems from a specific mathematical field.
+
+**Endpoint:** `GET /api/v2/generator/:topic`
+
+**Available Topics:**
+* `algebra` (Powers, Roots, Logarithms, Percentages)
+* `functions-general` (Function properties, Linear function, Graphs)
+* `quadratic` (Vertex, Roots, Inequalities, Viete's formulas)
+* `optimization` (Revenue optimization, Geometry optimization)
+* `sequences` (Arithmetic, Geometric, General properties)
+* `analytic` (Lines, Circles, Intersections, Coordinates)
+* `planimetry` (Triangles, Quadrilaterals, Angles, Theorems)
+* `stereometry` (Solids, Angles in solids, Sections)
+* `trigonometry` (Identities, Equations, Geometry applications)
+* `combinatorics` (Permutations, Combinations, Variations)
+* `probability` (Dice, Coins, Urns, Sets)
+* `statistics` (Mean, Median, Mode, Standard Deviation, Charts)
+
+**Examples:**
+* Get 1 easy quadratic problem:
+    `GET /api/v2/generator/quadratic?difficulty=easy`
+* Get 5 hard trigonometry problems:
+    `GET /api/v2/generator/trigonometry?difficulty=hard&count=5`
+
+### 2. Random Generator (Mix)
+Returns a mix of problems randomly selected from all available categories.
+
+* **Endpoint:** `GET /api/v2/generator/random`
+* **Example:** Get 10 random medium problems:
+    `GET /api/v2/generator/random?count=10&difficulty=medium`
+
+### 3. Full Exam Simulator
+Generates a complete exam structure (approx. 30 tasks) following the standard distribution of topics.
+
+* **Endpoint:** `GET /api/v2/exam/full`
+* **Example:**
+    `GET /api/v2/exam/full?difficulty=hard`
+
+---
+
+## 📦 Response Structure
+
+### Single Object (Default)
+```json
 {
-  {"zadanie":{
-// Description of problem
-"description":"Punkt $S=(2,7)$ jest środkiem odcinka $AB$, w którym $A=(-1,3)$. Punkt $B$ ma współrzędne:",
-// Answers (if ABCD-type of question)
-"combinations":["A) $(5,11)$","B) $(\\frac{1}{2}, 2)$","C) $(-\\frac{3}{2}, -5)$","D) $(3, 11)$"],
-// Answer to problem
-"answer":"A) $(5,11)$",
-// Photo (for example for geometric problems)
-"photoUrl":null,
-// Type of problem (ABCD-type of - zamkniete(closed) or not ABCD-type - otwarte (open))
-"type": "zamkniete/otwarte",
-// I'm using them to sort problems on website by tags
-"tags":["for example: PLANIMETRIA"],
-// Link to answer if answer is for example image or video
-"answerUrl":null,
-// Unical id, I'm using it to better know and fix specified problems
-"uid": "zad-1-plan"
-}}
+  "meta": {
+    "type": "QuadraticGenerator",
+    "difficulty": "medium"
+  },
+  "content": {
+    "question_text": "Determine the coordinates of the vertex of the parabola:",
+    "question_latex": "f(x) = 2x^2 - 4x + 1",
+    "image_svg": "<svg ...>...</svg>",  // Optional
+    "variables": { "a": 2, "b": -4, "c": 1, "p": 1, "q": -1 }
+  },
+  "answers": {
+    "type": "closed", // "closed" (ABCD) or "open"
+    "correct": "W(1, -1)",
+    "distractors": ["W(-1, -1)", "W(-1, 1)", "W(1, 1)"]
+  },
+  "solution": {
+    "steps": [
+      "Formula for p: $$p = -b/2a$$",
+      "Calculate q: $$q = f(p)$$",
+      "Result: $$W(1, -1)$$"
+    ]
+  }
 }
 ```
 
-or
+### Array (When count > 1)
+```JSON
 
-### `GET` [https://math-api-azure.vercel.app/problems](https://math-api-azure.vercel.app/problems)
-
-It is allowing you to get **all** of available problems.
-
-or
-
-### `GET` [https://math-api-azure.vercel.app/problems?types=type](https://math-api-azure.vercel.app/problems?types=type)
-
-It is allowing you to get only the problem of specified type:
-| type | description |
-| --- | --- |
-| `otwarte` | open problem (without ABCD-type of answers) |
-| `zamkniete` | closed problem (ABCD-type of answers) |
-
-or
-
-### `GET` [https://math-api-azure.vercel.app/problems?count=count](https://math-api-azure.vercel.app/problems?count=count)
-
-It is allowing you to get only the specified number of problems.
-
-for example:
-[https://math-api-azure.vercel.app/problems?count=5](https://math-api-azure.vercel.app/problems?count=5)
-will return 5 problems.
-
-## You can also combine these parameters:
-
-### `GET` [https://math-api-azure.vercel.app/problems?count=count&types=type](https://math-api-azure.vercel.app/problems?count=count&types=type)
-
-For example:
-[https://math-api-azure.vercel.app/problems?count=5&types=zamkniete](https://math-api-azure.vercel.app/problems?count=5&types=zamkniete)
-will return 5 closed problems.
-
-or
-
-### `GET` [https://math-api-azure.vercel.app/problems?matura=true](https://math-api-azure.vercel.app/problems?matura=true)
-
-Returns 7 easy problems, 8 medium problems and 5 hard ones. **You cannot combine any parameter with this one!**
-
-## Development
-
-For self-hosting or modifying the API, you can clone this repository and run:
-
-```shell
-npm install
+[
+  { "meta": { ... }, "content": { ... } },
+  { "meta": { ... }, "content": { ... } },
+  ...
+]
 ```
 
-## License
+## 📂 Project Structure
 
-In any form of usage, the API is licensed under MIT and the user is responsible for tagging the author (me) in the project.
+The project follows a modular architecture:
+```Plaintext
+
+src/
+  ├── engine/
+  │   ├── core/           # Base generator class
+  │   ├── utils/          # Math & SVG utilities
+  │   └── generators/     # Business logic
+  │       ├── algebra/    # Topic specific logic
+  │       ├── geometry/
+  │       ├── statistics/
+  │       ├── ...
+  │       └── ExamGenerator.js # Exam composition logic
+  └── index.js            # Express server entry point
+```
+
+© 2025 Szymon Wilczek 
