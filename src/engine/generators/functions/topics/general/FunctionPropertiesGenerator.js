@@ -155,8 +155,8 @@ class FunctionPropertiesGenerator extends BaseGenerator {
 
     return this.createResponse({
       question:
-        "Dziedziną funkcji $$f$$ określonej wzorem jest zbiór liczb rzeczywistych z wyłączeniem liczb:",
-      latex: `f(x) = \\frac{2x+1}{${denominatorLatex}}`,
+        "Dziedziną funkcji $$f$$ określonej wzorem $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ jest zbiór liczb rzeczywistych z wyłączeniem liczb:",
+      latex: null,
       image: null,
       variables: { x1, x2 },
       correctAnswer: `\\{${Math.min(x1, x2)}, ${Math.max(x1, x2)}\\}`,

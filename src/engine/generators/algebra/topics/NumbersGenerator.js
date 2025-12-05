@@ -160,7 +160,7 @@ class NumbersGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Oblicz $$${symbol}(${a}, ${b})$$.`,
-      latex: `${symbol}(${a}, ${b})`,
+      latex: null,
       image: null,
       variables: { a, b, mode },
       correctAnswer: `${result}`,

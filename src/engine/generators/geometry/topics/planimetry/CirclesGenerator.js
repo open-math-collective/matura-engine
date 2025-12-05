@@ -94,8 +94,8 @@ class CirclesGenerator extends BaseGenerator {
       const area = r * r;
       return this.createResponse({
         question: `Pole koła jest równe $$${area}\\pi$$. Promień tego koła wynosi:`,
-        latex: `P=${area}\\pi`,
-        image: PlanimetrySVGUtils.generateSVG({ type: "circle_r", r }),
+        latex: null,
+        image: null,
         variables: { area, r },
         correctAnswer: `${r}`,
         distractors: [`${area}`, `${area / 2}`, `${Math.sqrt(area) * 2}`],
@@ -193,10 +193,8 @@ class CirclesGenerator extends BaseGenerator {
 
   generateThalesTheorem() {
     let angleRange;
-    if (this.difficulty === "easy")
-      angleRange = [30, 60];
-    else if (this.difficulty === "hard")
-      angleRange = [15, 75];
+    if (this.difficulty === "easy") angleRange = [30, 60];
+    else if (this.difficulty === "hard") angleRange = [15, 75];
     else angleRange = [20, 70];
 
     const alpha = MathUtils.randomInt(angleRange[0], angleRange[1]);

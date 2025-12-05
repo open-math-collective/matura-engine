@@ -68,7 +68,7 @@ class GeneralSequencesGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Którym wyrazem ciągu $$(${formula})$$ jest liczba $$${X}$$?`,
-      latex: formula,
+      latex: null,
       image: null,
       variables: { n, X },
       correctAnswer: `${n}`,

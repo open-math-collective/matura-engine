@@ -31,7 +31,7 @@ class PyramidsAndPrismsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Krawędź podstawy ostrosłupa prawidłowego czworokątnego ma długość $$${a}$$. Krawędź boczna tworzy z płaszczyzną podstawy kąt $$${angle}^\\circ$$. Wysokość tego ostrosłupa jest równa:`,
-      latex: `a=${a}, \\alpha=${angle}^\\circ`,
+      latex: null, 
       image: StereometrySVGUtils.generateSVG({
         type: "pyramid_square",
         a,

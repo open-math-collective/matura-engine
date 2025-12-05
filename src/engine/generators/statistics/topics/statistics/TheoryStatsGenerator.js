@@ -16,7 +16,7 @@ class TheoryStatsGenerator extends BaseGenerator {
       const addVal = MathUtils.randomInt(2, 10);
       return this.createResponse({
         question: `Odchylenie standardowe zestawu danych jest równe $$${sigma}$$. Jeśli do każdej liczby z tego zestawu dodamy stałą wartość $$${addVal}$$, to odchylenie standardowe nowego zestawu będzie równe:`,
-        latex: `\\sigma_{stare}=${sigma}`,
+        latex: null, 
         image: null,
         variables: { sigma, addVal, type },
         correctAnswer: `${sigma}`,
@@ -36,7 +36,7 @@ class TheoryStatsGenerator extends BaseGenerator {
 
       return this.createResponse({
         question: `Odchylenie standardowe zestawu danych jest równe $$${sigma}$$. Jeśli każdą liczbę z tego zestawu pomnożymy przez $$${k}$$, to odchylenie standardowe nowego zestawu będzie równe:`,
-        latex: `\\sigma_{stare}=${sigma}, k=${k}`,
+        latex: null, 
         image: null,
         variables: { sigma, k, type },
         correctAnswer: `${newSigma}`,

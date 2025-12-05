@@ -117,7 +117,7 @@ class PointsAndSegmentsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Punkty $$A=(${x1}, ${y1})$$ i $$B=(${x2}, m)$$ są odległe o $$${dStr}$$. Jedną z możliwych wartości $$m$$ jest:`,
-      latex: `|AB|=${dStr}`,
+      latex: null,
       image: null,
       variables: { m, d },
       correctAnswer: `${m}`,
