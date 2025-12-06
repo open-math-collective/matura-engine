@@ -19,10 +19,10 @@ class GeometricOptimizationGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `W schronisku należy zbudować ogrodzenie wydzielające trzy identyczne prostokątne wybiegi o wspólnych ścianach wewnętrznych (przylegające do siebie dłuższym bokiem całego terenu). Do wykonania ogrodzenia zakupiono $$${L}$$ metrów siatki. Oblicz wymiary jednego małego wybiegu ($$x$$ i $$y$$), dla których suma pól tych wybiegów będzie największa.`,
-      latex: `L = ${L}m`,
-      image: this.generateGeometrySVG({ type: "fencing_3", x, y }),
+      latex: null,
+      image: null,
       variables: { L, x, y, maxArea },
-      correctAnswer: `x=${x} m, y=${y} m`,
+      correctAnswer: `x=${x}, y=${y}`,
       distractors: [
         `x=${x + 1} m, y=${y - 1} m`,
         `x=${y} m, y=${x} m`,
@@ -36,7 +36,7 @@ class GeometricOptimizationGenerator extends BaseGenerator {
         `$$y = ${y}$$.`,
       ],
       questionType: "open",
-      answerFormat: "x=a m, y=b m",
+      answerFormat: "x=a, y=b",
     });
   }
 
@@ -97,19 +97,15 @@ class GeometricOptimizationGenerator extends BaseGenerator {
         h: h_opt,
       }),
       variables: { a, S, h_opt, b_opt },
-      correctAnswer: `h = ${h_opt} dm`,
-      distractors: [
-        `h = ${h_opt - 2} dm`,
-        `h = ${b_opt} dm`,
-        `h = ${S / 2} dm`,
-      ],
+      correctAnswer: `h = ${h_opt}`,
+      distractors: [`h = ${h_opt - 2}`, `h = ${b_opt}`, `h = ${S / 2}`],
       steps: [
         `$$b + h = ${S} \\implies b = ${S} - h$$.`,
         `$$P(h) = \\frac{${a} + b}{2}h = -0.5h^2 + ${(a + S) / 2}h$$.`,
         `Wierzchołek $$p = ${h_opt}$$.`,
       ],
       questionType: "open",
-      answerFormat: "h=a dm",
+      answerFormat: "h=a",
     });
   }
 
