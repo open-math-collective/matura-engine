@@ -149,15 +149,14 @@ class BasicOperationsGenerator extends BaseGenerator {
     const formatNum = (num) => (Number.isInteger(num) ? `${num}` : `${num}`);
 
     return this.createResponse({
-      question:
-        "Wartość wyrażenia $$\\frac{${formatNum(a_base)} \\cdot 10^{${k}}}{${formatNum(b_base)} \\cdot 10^{${m}}}$$ jest równa:",
+      question: `Wartość wyrażenia $$\\frac{${formatNum(a_base)} \\cdot 10^{${k}}}{${formatNum(b_base)} \\cdot 10^{${m}}}$$ jest równa:`,
       latex: null,
       image: null,
       variables: { a_base, b_base, k, m },
       correctAnswer: `${formatNum(finalMantissa)} \\cdot 10^{${finalExponent}}`,
       distractors: [
         `${formatNum(finalMantissa)} \\cdot 10^{${k - m}}`,
-        `${formatNum(mantissa * 10)} \\cdot 10^{${exponent}}`,
+        `${formatNum(mantissa * 10)} \\cdot 10^{${exponent + 1}}`,
         `${formatNum(a_base - b_base)} \\cdot 10^{${k - m}}`,
       ],
       steps: [
