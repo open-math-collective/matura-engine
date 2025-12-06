@@ -57,6 +57,8 @@ class UrnsAndCardsGenerator extends BaseGenerator {
         `Liczba kul sprzyjających zdarzeniu: $$${favored}$$`,
         `$$P(A) = \\frac{${favored}}{${total}}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -106,6 +108,8 @@ class UrnsAndCardsGenerator extends BaseGenerator {
           : `Liczba par mieszanych: $$|A| = ${boys} \\cdot ${girls} = ${favored}$$`,
         `$$P(A) = \\frac{${favored}}{${omega}}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -171,6 +175,7 @@ class UrnsAndCardsGenerator extends BaseGenerator {
         `Liczba kart sprzyjających: $$${favored}$$.`,
         `$$P(A) = \\frac{${favored}}{52}$$`,
       ],
+      questionType: "closed",
     });
   }
 

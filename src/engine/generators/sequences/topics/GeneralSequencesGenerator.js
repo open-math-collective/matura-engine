@@ -78,6 +78,7 @@ class GeneralSequencesGenerator extends BaseGenerator {
         type === "quadratic" && b !== 0 ? `${Math.abs(n + b)}` : `${n + 2}`,
       ],
       steps: [`$$a_n = ${X} \\implies n = ${n}$$`],
+      questionType: "closed",
     });
   }
 
@@ -103,6 +104,8 @@ class GeneralSequencesGenerator extends BaseGenerator {
         steps: [
           `$$${a}n + ${b} > 0 \\implies n < ${parseFloat(limit.toFixed(2))} \\implies n \\in \\{1, ..., ${count}\\}$$`,
         ],
+        questionType: "open",
+        answerType: "number",
       });
     } else {
       return this.generateQuadraticSequencePos();
@@ -123,6 +126,7 @@ class GeneralSequencesGenerator extends BaseGenerator {
       correctAnswer: type,
       distractors: [a > 0 ? "malejący" : "rosnący", "stały", "niemonotoniczny"],
       steps: [`Różnica $$a_{n+1}-a_n = ${a}$$, więc ciąg jest ${type}.`],
+      questionType: "closed",
     });
   }
 
@@ -154,6 +158,8 @@ class GeneralSequencesGenerator extends BaseGenerator {
       steps: [
         `Parabola w dół, dodatnia między $$${x1}$$ a $$${x2}$$. Ilość liczb całkowitych: $$${count}$$.`,
       ],
+      questionType: "open",
+      answerType: "number",
     });
   }
 
@@ -165,13 +171,15 @@ class GeneralSequencesGenerator extends BaseGenerator {
     const avg = middle;
 
     return this.createResponse({
-      question: `Średnia arytmetyczna pięciu początkowych wyrazów ciągu arytmetycznego wynosi $$${avg}$$. Pierwszy wyraz tego ciągu to $$${a1}$$. Różnica tego ciągu jest równa:`,
+      question: `Średnia arytmetyczna pięciu początkowych wyrazów ciągu arytmetycznego wynosi $$${avg}$$. Pierwszy wyraz tego ciągu to $$${a1}$$. Oblicz różnicę tego ciągu.`,
       latex: `\\bar{x}=${avg}, a_1=${a1}`,
       image: null,
       variables: { a1, avg, r },
       correctAnswer: `${r}`,
       distractors: [`${r + 1}`, `${avg - a1}`, `${r * 2}`],
       steps: [`$$a_3 = ${avg} = a_1 + 2r \\implies r = ${r}$$`],
+      questionType: "open",
+      answerType: "number",
     });
   }
 
@@ -194,12 +202,13 @@ class GeneralSequencesGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Suma $$n$$ początkowych wyrazów ciągu liczbowego określona jest wzorem $$${formula}$$ dla $$n \\ge 1$$. Trzeci wyraz tego ciągu jest równy:`,
-      latex: formula,
+      latex: null,
       image: null,
       variables: { S3, S2, a3 },
       correctAnswer: `${a3}`,
       distractors: [`${S3}`, `${S3 + S2}`, `${a * 3 * 3 + b * 3}`],
       steps: [`$$a_3 = S_3 - S_2 = ${S3} - ${S2} = ${a3}$$`],
+      questionType: "closed",
     });
   }
 }

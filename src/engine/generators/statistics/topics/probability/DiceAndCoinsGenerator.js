@@ -41,6 +41,8 @@ class DiceAndCoinsGenerator extends BaseGenerator {
         `Jest ich $$${favored}$$.`,
         `$$P(A) = \\frac{${favored}}{36}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -82,6 +84,8 @@ class DiceAndCoinsGenerator extends BaseGenerator {
         `Liczba zdarzeń sprzyjających: $$${favored}$$`,
         `$$P(A) = \\frac{${favored}}{36}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -125,6 +129,8 @@ class DiceAndCoinsGenerator extends BaseGenerator {
         `Liczba zdarzeń sprzyjających: $$${favored}$$`,
         `$$P(A) = \\frac{${favored}}{36}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -139,7 +145,7 @@ class DiceAndCoinsGenerator extends BaseGenerator {
     const gcd = this.getGCD(favored, omega);
 
     return this.createResponse({
-      question: `Rzucamy $$${n}$$ razy monetą. Prawdopodobieństwo wyrzucenia co najmniej jednego orła:`,
+      question: `Rzucamy $$${n}$$ razy monetą. Prawdopodobieństwo wyrzucenia co najmniej jednego orła wynosi:`,
       latex: ``,
       image: null,
       variables: { n, favored },
@@ -152,6 +158,7 @@ class DiceAndCoinsGenerator extends BaseGenerator {
       steps: [
         `Zdarzenie przeciwne (same reszki): 1. $$P(A) = 1 - \\frac{1}{${omega}}$$`,
       ],
+      questionType: "closed",
     });
   }
 

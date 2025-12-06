@@ -71,6 +71,8 @@ class SetsAndNumbersGenerator extends BaseGenerator {
         `Zliczamy pary: $$${favored}$$`,
         `$$P(A) = \\frac{${favored}}{${omega}}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -114,6 +116,8 @@ class SetsAndNumbersGenerator extends BaseGenerator {
         `Liczba par sprzyjających: $$${favored}$$`,
         `$$P(A) = \\frac{${favored}}{${omega}}$$`,
       ],
+      questionType: "open",
+      answerFormat: "a/b",
     });
   }
 
@@ -147,6 +151,7 @@ class SetsAndNumbersGenerator extends BaseGenerator {
         `$$|A \\cup B| = ${c1} + ${c2} - ${c12} = ${favored}$$`,
         `$$P = \\frac{${favored}}{${n}}$$`,
       ],
+      questionType: "closed",
     });
   }
 
@@ -172,7 +177,7 @@ class SetsAndNumbersGenerator extends BaseGenerator {
 
     const gcd = this.getGCD(favored, n);
     return this.createResponse({
-      question: `Ze zbioru $$\\{1, ..., ${n}\\}$$ losujemy liczbę. Prawdopodobieństwo, że będzie ${desc}:`,
+      question: `Ze zbioru $$\\{1, ..., ${n}\\}$$ losujemy liczbę. Prawdopodobieństwo, że będzie ${desc} jest równe:`,
       latex: ``,
       image: null,
       variables: { n, type },
@@ -186,6 +191,7 @@ class SetsAndNumbersGenerator extends BaseGenerator {
         `Liczba sprzyjających: $$${favored}$$`,
         `$$P = \\frac{${favored}}{${n}}$$`,
       ],
+      questionType: "closed",
     });
   }
 

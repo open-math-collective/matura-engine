@@ -39,16 +39,14 @@ class GeometricSequencesGenerator extends BaseGenerator {
       image: null,
       variables: { f: t1, m: t2, l: t3 },
       correctAnswer: `${Math.abs(t2)}`,
-      distractors: [
-        `${t2 * 2}`,
-        `${Math.abs(t3 - t1)}`,
-        `${t1 * t3}`,
-      ],
+      distractors: [`${t2 * 2}`, `${Math.abs(t3 - t1)}`, `${t1 * t3}`],
       steps: [
         `Własność ciągu geometrycznego: $$x^2 = a_1 \\cdot a_3$$`,
         `$$x^2 = ${t1} \\cdot ${t3} = ${t1 * t3}$$`,
         `$$x = \\sqrt{${t1 * t3}} = ${Math.abs(t2)}$$`,
       ],
+      questionType: "open",
+      answerFormat: "number",
     });
   }
 
@@ -89,6 +87,8 @@ class GeometricSequencesGenerator extends BaseGenerator {
         `Obliczamy potęgę: $$(${q})^{${n}} = ${Math.pow(q, n)}$$`,
         `$$S_{${n}} = ${a1} \\cdot \\frac{1 - ${Math.pow(q, n)}}{${1 - q}} = ${sum}$$`,
       ],
+      questionType: "open",
+      answerFormat: "number",
     });
   }
 
@@ -132,6 +132,7 @@ class GeometricSequencesGenerator extends BaseGenerator {
         `$$q^{${diff}} = \\frac{${valM}}{${valK}} = ${Math.pow(q, diff)}$$`,
         `$$q = \\sqrt[${diff}]{${Math.pow(q, diff)}} = ${q}$$`,
       ],
+      questionType: "closed",
     });
   }
 
@@ -157,7 +158,7 @@ class GeometricSequencesGenerator extends BaseGenerator {
     const t3 = `x + ${b}`;
 
     return this.createResponse({
-      question: `Ciąg $$(${t1}, ${t2}, ${t3})$$ jest geometryczny. Wtedy $$x$$ wynosi:`,
+      question: `Ciąg $$(${t1}, ${t2}, ${t3})$$ jest geometryczny. Wtedy i tylko wtedy kiedy $$x$$ wynosi:`,
       latex: ``,
       image: null,
       variables: { x, a, b },
@@ -170,6 +171,7 @@ class GeometricSequencesGenerator extends BaseGenerator {
         `$$${a * a} = ${b}x - ${2 * a}x = ${b - 2 * a}x$$`,
         `$$x = ${x}$$`,
       ],
+      questionType: "closed",
     });
   }
 }

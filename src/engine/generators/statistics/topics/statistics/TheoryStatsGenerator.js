@@ -16,7 +16,7 @@ class TheoryStatsGenerator extends BaseGenerator {
       const addVal = MathUtils.randomInt(2, 10);
       return this.createResponse({
         question: `Odchylenie standardowe zestawu danych jest równe $$${sigma}$$. Jeśli do każdej liczby z tego zestawu dodamy stałą wartość $$${addVal}$$, to odchylenie standardowe nowego zestawu będzie równe:`,
-        latex: null, 
+        latex: null,
         image: null,
         variables: { sigma, addVal, type },
         correctAnswer: `${sigma}`,
@@ -29,6 +29,7 @@ class TheoryStatsGenerator extends BaseGenerator {
           `Dodanie stałej wartości do wszystkich danych przesuwa je na osi, ale nie zmienia ich rozrzutu (odległości od średniej).`,
           `Zatem odchylenie standardowe pozostaje bez zmian: $$${sigma}$$`,
         ],
+        questionType: "closed",
       });
     } else {
       const k = MathUtils.randomElement([-2, 2, 3]);
@@ -36,19 +37,16 @@ class TheoryStatsGenerator extends BaseGenerator {
 
       return this.createResponse({
         question: `Odchylenie standardowe zestawu danych jest równe $$${sigma}$$. Jeśli każdą liczbę z tego zestawu pomnożymy przez $$${k}$$, to odchylenie standardowe nowego zestawu będzie równe:`,
-        latex: null, 
+        latex: null,
         image: null,
         variables: { sigma, k, type },
         correctAnswer: `${newSigma}`,
-        distractors: [
-          `${sigma}`,
-          `${sigma + Math.abs(k)}`,
-          `${sigma * k * k}`,
-        ],
+        distractors: [`${sigma}`, `${sigma + Math.abs(k)}`, `${sigma * k * k}`],
         steps: [
           `Mnożenie wszystkich danych przez stałą $$k$$ zmienia odchylenie standardowe $$|k|$$ razy.`,
           `Nowe odchylenie: $$|${k}| \\cdot ${sigma} = ${Math.abs(k)} \\cdot ${sigma} = ${newSigma}$$`,
         ],
+        questionType: "closed",
       });
     }
   }

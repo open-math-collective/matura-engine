@@ -77,6 +77,7 @@ class ScalingGenerator extends BaseGenerator {
       correctAnswer: correct,
       distractors: distractors,
       steps: steps,
+      questionType: "closed",
     });
   }
 }

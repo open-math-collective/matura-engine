@@ -24,6 +24,7 @@ class CubesGenerator extends BaseGenerator {
           `Przekątna sześcianu o krawędzi $$a$$: $$D = a\\sqrt{3}$$`,
           `$$D = ${a}\\sqrt{3}$$`,
         ],
+        questionType: "closed",
       });
     } else {
       const V = a * a * a;
@@ -38,6 +39,7 @@ class CubesGenerator extends BaseGenerator {
           `$$D = a\\sqrt{3} = ${a}\\sqrt{3} \\implies a = ${a}$$`,
           `$$V = a^3 = ${a}^3 = ${V}$$`,
         ],
+        questionType: "closed",
       });
     }
   }
@@ -64,7 +66,7 @@ class CubesGenerator extends BaseGenerator {
     else H_latex = `\\frac{${a}\\sqrt{6}}{3}`;
 
     return this.createResponse({
-      question: `Podstawą prostopadłościanu jest kwadrat o boku $$${a}$$. Przekątna bryły tworzy z płaszczyzną podstawy kąt $$${angle}^\\circ$$. Wysokość bryły wynosi:`,
+      question: `Podstawą prostopadłościanu jest kwadrat o boku $$${a}$$. Przekątna bryły tworzy z płaszczyzną podstawy kąt $$${angle}^\\circ$$. Oblicz wysokość bryły.`,
       latex: `a=${a}, \\alpha=${angle}^\\circ`,
       image: StereometrySVGUtils.generateSVG({
         type: "cuboid_angle",
@@ -83,6 +85,8 @@ class CubesGenerator extends BaseGenerator {
         `Z trójkąta prostokątnego: $$\\tg ${angle}^\\circ = \\frac{H}{d}$$`,
         `$$H = ${a}\\sqrt{2} \\cdot \\tg ${angle}^\\circ = ${H_latex}$$`,
       ],
+      questionType: "open",
+      answerFormat: "number",
     });
   }
 
@@ -122,6 +126,7 @@ class CubesGenerator extends BaseGenerator {
         `$$d = \\sqrt{${a}^2 + ${b}^2 + ${c}^2}$$`,
         `$$d = \\sqrt{${a * a} + ${b * b} + ${c * c}} = \\sqrt{${sumSq}} = ${diagStr}$$`,
       ],
+      questionType: "closed",
     });
   }
 }

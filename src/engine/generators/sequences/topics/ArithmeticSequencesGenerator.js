@@ -27,7 +27,7 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
     if (askForEdge) {
       return this.createResponse({
         question: `Liczby $$(x, ${middle}, ${last})$$ tworzą ciąg arytmetyczny. Oblicz $$x$$.`,
-        latex: `(x, ${middle}, ${last})`,
+        latex: null,
         image: null,
         variables: { first, middle, last },
         correctAnswer: `${first}`,
@@ -36,17 +36,21 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
           `$$r = ${last} - ${middle} = ${r}$$`,
           `$$x = ${middle} - r = ${first}$$`,
         ],
+        questionType: "open",
+        answerFormat: "number",
       });
     }
 
     return this.createResponse({
       question: `Liczby $$(${first}, x, ${last})$$ tworzą ciąg arytmetyczny. Oblicz $$x$$.`,
-      latex: `(${first}, x, ${last})`,
+      latex: null,
       image: null,
       variables: { first, middle, last },
       correctAnswer: `${middle}`,
       distractors: [`${first + last}`, `${r}`, `${middle + 1}`],
       steps: [`$$x = \\frac{${first}+${last}}{2} = ${middle}$$`],
+      questionType: "open",
+      answerFormat: "number",
     });
   }
 
@@ -77,7 +81,7 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `W ciągu arytmetycznym $$a_{${k}}=${vk}$$ oraz $$a_{${m}}=${vm}$$. Oblicz różnicę $$r$$ tego ciągu.`,
-      latex: `a_{${k}}=${vk}, a_{${m}}=${vm}`,
+      latex: null,
       image: null,
       variables: { r },
       correctAnswer: `r=${r}`,
@@ -87,6 +91,8 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
         `$$${vm} - ${vk} = (${m}-${k})r$$`,
         `$$${vm - vk} = ${m - k}r \\implies r=${r}$$`,
       ],
+      questionType: "open",
+      answerFormat: "r=...",
     });
   }
 
@@ -121,7 +127,7 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
       dist1 = sum + n * r;
       dist2 = sum - a1;
     } else {
-      question = `W ciągu arytmetycznym $$a_1 = ${a1}$$ oraz $$r = ${r}$$. Oblicz sumę $$${n}$$ początkowych wyrazów tego ciągu.`;
+      question = `W pewnym ciągu arytmetycznym pierwszy wyraz $$a_1 = ${a1}$$ oraz różnica tego ciągu wynosi $$r = ${r}$$. Oblicz sumę $$${n}$$ początkowych wyrazów tego ciągu.`;
       latex: `a_1=${a1}, r=${r}`;
       dist1 = ((a1 + an) / 2) * (n - 1);
       dist2 = (a1 + an) * n;
@@ -139,6 +145,8 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
         `Wzór na sumę: $$S_{${n}} = \\frac{a_1 + a_{${n}}}{2} \\cdot ${n}$$`,
         `$$S_{${n}} = \\frac{${a1} + ${an}}{2} \\cdot ${n} = ${sum}$$`,
       ],
+      questionType: "open",
+      answerFormat: "number",
     });
   }
 
@@ -171,6 +179,7 @@ class ArithmeticSequencesGenerator extends BaseGenerator {
         `$$2(${t2}) = (${t1}) + (${t3})$$`,
         `Rozwiązujemy równanie: $$x = ${x}$$`,
       ],
+      questionType: "closed",
     });
   }
 }

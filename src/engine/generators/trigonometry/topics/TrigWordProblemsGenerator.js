@@ -69,12 +69,14 @@ class TrigWordProblemsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: question,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({ type: "ladder", d, angle }),
+      latex: null,
+      image: null,
       variables: { d, angle },
       correctAnswer: correct,
       distractors: distractors,
       steps: steps,
+      questionType: "open",
+      answerFormat: "number",
     });
   }
 
@@ -143,16 +145,14 @@ class TrigWordProblemsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: question,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({
-        type: "shadow",
-        h: typeof h === "string" ? base * 1.7 : h,
-        s: typeof s === "string" ? base * 1.7 : s,
-      }),
+      latex: null,
+      image: null,
       variables: { h, s, angle },
       correctAnswer: correct,
       distractors: distractors,
       steps: steps,
+      questionType: "open",
+      answerFormat: this.difficulty === "hard" ? "number" : "angle",
     });
   }
 }

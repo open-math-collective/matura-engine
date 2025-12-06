@@ -22,8 +22,13 @@ class TheoryGenerator extends BaseGenerator {
         image: null,
         variables: { res },
         correctAnswer: `${res}`,
-        distractors: [`${(nA + nB) / 10}`, `${(1 - res).toFixed(1)}`, `1`],
+        distractors: [
+          `${(nA + nB) / 10}`,
+          `${(1 - res).toFixed(1)}`,
+          `${res + 0.1}`,
+        ],
         steps: [`$$P(A \\cup B) = ${pA} + ${pB} - ${pInt} = ${res}$$`],
+        questionType: "closed",
       });
     } else {
       const den = MathUtils.randomElement([7, 9, 12, 15]);
@@ -58,6 +63,7 @@ class TheoryGenerator extends BaseGenerator {
           `$$P(A)=${nA}/${den}, P(B)=${nB}/${den}, P(A \\cap B)=${nIntersect}/${den}$$`,
           `$$P(A \\cup B) = \\frac{${nA} + ${nB} - ${nIntersect}}{${den}} = \\frac{${nUnion}}{${den}}$$`,
         ],
+        questionType: "closed",
       });
     }
   }
@@ -89,6 +95,7 @@ class TheoryGenerator extends BaseGenerator {
           `1`,
         ],
         steps: [`$$P(A') = 1 - P(A) = 1 - ${val} = ${res}$$`],
+        questionType: "closed",
       });
     } else {
       const den = MathUtils.randomInt(denRange[0], denRange[1]);
@@ -103,6 +110,7 @@ class TheoryGenerator extends BaseGenerator {
         steps: [
           `$$P(A') = 1 - P(A) = 1 - \\frac{${num}}{${den}} = \\frac{${den - num}}{${den}}$$`,
         ],
+        questionType: "closed",
       });
     }
   }
@@ -133,7 +141,7 @@ class TheoryGenerator extends BaseGenerator {
     const gcd = this.getGCD(subLen * 10, totalLen * 10);
 
     return this.createResponse({
-      question: `Z przedziału $$<${start}, ${end}>$$ losujemy liczbę. Prawdopodobieństwo, że należy do $$<${subStart}, ${subEnd}>$$:`,
+      question: `Z przedziału $$<${start}, ${end}>$$ losujemy liczbę. Prawdopodobieństwo, że należy ona do przedziału $$<${subStart}, ${subEnd}>$$ jest równe:`,
       latex: ``,
       image: null,
       variables: {},
@@ -148,6 +156,7 @@ class TheoryGenerator extends BaseGenerator {
         `Długość przedziału A: $$|A| = ${subEnd} - ${subStart} = ${subLen}$$`,
         `$$P(A) = \\frac{${subLen}}{${totalLen}}$$`,
       ],
+      questionType: "closed",
     });
   }
 

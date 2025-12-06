@@ -75,6 +75,7 @@ class MeasuresGenerator extends BaseGenerator {
         `${sorted[0]}`,
       ],
       steps: steps,
+      questionType: "closed",
     });
   }
 
@@ -104,6 +105,7 @@ class MeasuresGenerator extends BaseGenerator {
       correctAnswer: `${targetMode}`,
       distractors: [`${numbers[0]}`, `${numbers[1]}`, `${numbers[2]}`],
       steps: [`Liczba $$${targetMode}$$ występuje najczęściej.`],
+      questionType: "closed",
     });
   }
 
@@ -140,6 +142,7 @@ class MeasuresGenerator extends BaseGenerator {
         `${Math.floor(mean)}`,
       ],
       steps: [`Licznik: ${num}, Mianownik: ${den}, Wynik: ${meanStr}`],
+      questionType: "closed",
     });
   }
 
@@ -182,6 +185,7 @@ class MeasuresGenerator extends BaseGenerator {
         `${this.difficulty === "easy" ? 4 : variance + 2}`,
       ],
       steps: [`Średnia: ${mean}`, `Wariancja: ${variance}`, `Odchylenie: ...`],
+      questionType: "closed",
     });
   }
 
@@ -209,7 +213,7 @@ class MeasuresGenerator extends BaseGenerator {
     }
 
     return this.createResponse({
-      question: `Średnia arytmetyczna zestawu liczb: $$${allNums.join(", ")}$$ jest równa $$${targetMean}$$. Wtedy $$x$$ wynosi:`,
+      question: `Średnia arytmetyczna zestawu liczb: $$${allNums.join(", ")}$$ jest równa $$${targetMean}$$. Oblicz ile wynosi $$x$$.`,
       latex: `\\bar{x}=${targetMean}`,
       image: null,
       variables: { known, targetMean, x },
@@ -219,6 +223,8 @@ class MeasuresGenerator extends BaseGenerator {
         `Suma musi wynosić $$${count} \\cdot ${targetMean} = ${targetSum}$$`,
         `$$x = ${targetSum} - ${currentSum} = ${x}$$`,
       ],
+      questionType: "open",
+      answerFormat: "numer",
     });
   }
 
@@ -240,6 +246,7 @@ class MeasuresGenerator extends BaseGenerator {
       steps: [
         `$$M = \\frac{b+x}{2} \\implies 2M = b+x \\implies x = 2M - b = ${x}$$`,
       ],
+      questionType: "closed",
     });
   }
 
@@ -252,7 +259,7 @@ class MeasuresGenerator extends BaseGenerator {
     const x = sum2 - sum1;
 
     return this.createResponse({
-      question: `Średnia arytmetyczna zestawu $$${n}$$ liczb wynosi $$${S1}$$. Gdy do tego zestawu dopiszemy liczbę $$x$$, to średnia wzrośnie do $$${S2}$$. Liczba $$x$$ jest równa:`,
+      question: `Średnia arytmetyczna zestawu $$${n}$$ liczb wynosi $$${S1}$$. Gdy do tego zestawu dopiszemy liczbę $$x$$, to średnia wzrośnie do $$${S2}$$. Ile wynosi liczba $$x$$?`,
       latex: ``,
       image: null,
       variables: { n, S1, S2, x },
@@ -263,6 +270,8 @@ class MeasuresGenerator extends BaseGenerator {
         `Suma nowa: ${sum2}`,
         `x = ${sum2} - ${sum1} = ${x}`,
       ],
+      questionType: "open",
+      answerFormat: "numer",
     });
   }
 }
