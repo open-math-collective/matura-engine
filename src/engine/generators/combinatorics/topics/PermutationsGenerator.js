@@ -18,7 +18,7 @@ class PermutationsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Na ile sposobów $$${n}$$ osób może ustawić się w kolejce do kasy?`,
-      latex: `n=${n}`,
+      latex: null,
       image: null,
       variables: { n },
       correctAnswer: `${res}`,
@@ -117,7 +117,7 @@ class PermutationsGenerator extends BaseGenerator {
           : `$$(${n}-1)! = ${res}$$`,
       ],
       questionType: "open",
-      answerType: "number",
+      answerFormat: "number",
     });
   }
 
