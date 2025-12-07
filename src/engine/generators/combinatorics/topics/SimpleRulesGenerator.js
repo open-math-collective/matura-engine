@@ -164,13 +164,46 @@ class SimpleRulesGenerator extends BaseGenerator {
       }
     }
 
+    const candidates = [
+      count - 1,
+      count + 1,
+      count + 2,
+      sumTarget,
+      sumTarget * 2,
+      sumTarget + 10,
+      count + 5,
+      Math.max(1, count - 2),
+    ];
+
+    const uniqueDistractors = [];
+    const usedValues = new Set();
+    usedValues.add(count);
+
+    for (const val of candidates) {
+      if (val > 0 && !usedValues.has(val)) {
+        uniqueDistractors.push(`${val}`);
+        usedValues.add(val);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
+    let offset = 1;
+    while (uniqueDistractors.length < 3) {
+      const val = count + offset;
+      if (val > 0 && !usedValues.has(val)) {
+        uniqueDistractors.push(`${val}`);
+        usedValues.add(val);
+      }
+      offset = offset > 0 ? -offset : -offset + 1;
+    }
+
     return this.createResponse({
       question: `Ile jest wszystkich liczb naturalnych trzycyfrowych, których suma cyfr jest równa $$${sumTarget}$$?`,
       latex: ``,
       image: null,
       variables: { sumTarget, count },
       correctAnswer: `${count}`,
-      distractors: [`${count + 2}`, `${count - 1}`, `${sumTarget * 3}`],
+      distractors: uniqueDistractors,
       steps: [
         `Wypisujemy systematycznie liczby trzycyfrowe o sumie cyfr $$${sumTarget}$$:`,
         `$$${examples.join(", ")}...$$`,
