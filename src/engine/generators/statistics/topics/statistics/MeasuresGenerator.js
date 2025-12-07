@@ -214,7 +214,7 @@ class MeasuresGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Średnia arytmetyczna zestawu liczb: $$${allNums.join(", ")}$$ jest równa $$${targetMean}$$. Oblicz ile wynosi $$x$$.`,
-      latex: `\\bar{x}=${targetMean}`,
+      latex: null,
       image: null,
       variables: { known, targetMean, x },
       correctAnswer: `${x}`,
@@ -238,7 +238,7 @@ class MeasuresGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Dany jest zestaw liczb uporządkowanych rosnąco: $$${setStr}$$. Mediana tego zestawu jest równa $$${M}$$. Wtedy $$x$$ wynosi:`,
-      latex: `M=${M}`,
+      latex: null,
       image: null,
       variables: { a, b, x, c, M },
       correctAnswer: `${x}`,
