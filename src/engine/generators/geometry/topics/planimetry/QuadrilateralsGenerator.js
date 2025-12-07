@@ -18,21 +18,47 @@ class QuadrilateralsGenerator extends BaseGenerator {
     const area = (d1_final * d2_final) / 2;
     const areaStr = Number.isInteger(area) ? `${area}` : area.toFixed(1);
 
+    const candidates = [
+      d1_final * d2_final,
+      d1_final + d2_final,
+      (d1_final * d2_final) / 4,
+      2 * (d1_final + d2_final),
+      area + d1_final,
+      area - d2_final,
+      Math.abs(d1_final - d2_final),
+    ];
+
+    const uniqueDistractors = [];
+    const usedValues = new Set();
+    usedValues.add(area);
+
+    for (const val of candidates) {
+      if (val > 0 && !usedValues.has(val)) {
+        const valStr = Number.isInteger(val) ? `${val}` : val.toFixed(1);
+        uniqueDistractors.push(valStr);
+        usedValues.add(val);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
+    let offset = 1;
+    while (uniqueDistractors.length < 3) {
+      const val = area + offset;
+      if (val > 0 && !usedValues.has(val)) {
+        const valStr = Number.isInteger(val) ? `${val}` : val.toFixed(1);
+        uniqueDistractors.push(valStr);
+        usedValues.add(val);
+      }
+      offset = offset > 0 ? -offset : -offset + 1;
+    }
+
     return this.createResponse({
       question: `Pole rombu o przekątnych $$${d1_final}$$ i $$${d2_final}$$ wynosi:`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({
-        type: "rhombus",
-        d1: d1_final,
-        d2: d2_final,
-      }),
+      latex: null,
+      image: null,
       variables: { d1: d1_final, d2: d2_final },
       correctAnswer: areaStr,
-      distractors: [
-        `${d1_final * d2_final}`,
-        `${d1_final + d2_final}`,
-        `${area * 2}`,
-      ],
+      distractors: uniqueDistractors,
       steps: [
         `$$P = \\frac{d_1 d_2}{2} = \\frac{${d1_final} \\cdot ${d2_final}}{2} = ${areaStr}$$`,
       ],
@@ -49,11 +75,8 @@ class QuadrilateralsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Kąt między dłuższą przekątną a bokiem rombu ma miarę $$${angle}^\\circ$$. Oblicz kąt rozwarty tego rombu.`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({
-        type: "rhombus_angles",
-        alpha: angle,
-      }),
+      latex: null,
+      image: null,
       variables: { alpha: angle, obtuse },
       correctAnswer: `${obtuse}^\\circ`,
       distractors: [
@@ -78,11 +101,8 @@ class QuadrilateralsGenerator extends BaseGenerator {
     const beta = 180 - alpha;
     return this.createResponse({
       question: `Kąt ostry równoległoboku ma miarę $$${alpha}^\\circ$$. Miara kąta rozwartego tego równoległoboku jest równa:`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({
-        type: "parallelogram",
-        angle: alpha,
-      }),
+      latex: null,
+      image: null,
       variables: { alpha, beta },
       correctAnswer: `${beta}^\\circ`,
       distractors: [
@@ -110,22 +130,50 @@ class QuadrilateralsGenerator extends BaseGenerator {
     const area = 0.5 * (a + b_final) * h;
     const areaStr = Number.isInteger(area) ? `${area}` : area.toFixed(1);
 
+    const candidates = [
+      area * 2,
+      (a + b_final) * 2,
+      a * b_final * h,
+      a * h,
+      b_final * h,
+      a + b_final + h,
+      area + h,
+      Math.abs(area - h),
+    ];
+
+    const uniqueDistractors = [];
+    const usedValues = new Set();
+    usedValues.add(area);
+
+    for (const val of candidates) {
+      if (!usedValues.has(val) && val > 0) {
+        uniqueDistractors.push(
+          Number.isInteger(val) ? `${val}` : val.toFixed(1),
+        );
+        usedValues.add(val);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
+    let offset = 2;
+    while (uniqueDistractors.length < 3) {
+      const val = area + offset;
+      if (val > 0 && !usedValues.has(val)) {
+        uniqueDistractors.push(
+          Number.isInteger(val) ? `${val}` : val.toFixed(1),
+        );
+        usedValues.add(val);
+      }
+      offset = offset > 0 ? -offset : -offset + 1;
+    }
+
     return this.createResponse({
       question: `Trapez ma podstawy $$${a}$$ i $$${b_final}$$ oraz wysokość $$${h}$$. Jego pole wynosi:`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({
-        type: "trapezoid",
-        a,
-        b: b_final,
-        h,
-      }),
+      latex: null,
+      image: null,
       variables: { a, b: b_final, h, area },
       correctAnswer: areaStr,
-      distractors: [
-        `${(a + b_final) * h}`,
-        `${area * 2}`,
-        `${a * b_final * h}`,
-      ],
+      distractors: uniqueDistractors,
       steps: [`$$P = \\frac{${a}+${b_final}}{2} \\cdot ${h} = ${areaStr}$$`],
       questionType: "closed",
     });
@@ -138,11 +186,8 @@ class QuadrilateralsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Kąt ostry równoległoboku to $$${alpha}^\\circ$$. Oblicz kąt rozwarty.`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({
-        type: "parallelogram",
-        angle: alpha,
-      }),
+      latex: null,
+      image: null,
       variables: { alpha },
       correctAnswer: `α=${180 - alpha}^\\circ`,
       distractors: [
@@ -163,9 +208,9 @@ class QuadrilateralsGenerator extends BaseGenerator {
 
     const gamma = 180 - alpha;
     return this.createResponse({
-      question: `Mamy czworokąt wpisany w okrąg. Kąt $$A$$ ma $$${alpha}^\\circ$$. Kąt $$C$$ ma miarę:`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({ type: "cyclic_quad", alpha }),
+      question: `W okrąg wpisano czworokąt. Kąt $$A$$ ma $$${alpha}^\\circ$$. Kąt $$C$$ ma miarę:`,
+      latex: null,
+      image: null,
       variables: { alpha, gamma },
       correctAnswer: `${gamma}^\\circ`,
       distractors: [
@@ -199,14 +244,8 @@ class QuadrilateralsGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `W czworokąt wpisano okrąg. Boki $$AB=${a_final}, BC=${b}, CD=${c_final}$$. $$DA$$ wynosi:`,
-      latex: ``,
-      image: PlanimetrySVGUtils.generateSVG({
-        type: "tangential_quad",
-        a: a_final,
-        b,
-        c: c_final,
-        d,
-      }),
+      latex: null,
+      image: null,
       variables: { a: a_final, b, c: c_final, d },
       correctAnswer: `${d}`,
       distractors: [
