@@ -32,8 +32,8 @@ class TrigGeometryGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `W trójkącie prostokątnym o bokach $$${a}, ${b}, ${c}$$ kąt $$\\alpha$$ leży naprzeciwko boku $$${a}$$. Wartość $$${func} \\alpha$$ wynosi:`,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({ type: "triangle", a, b, c }),
+      latex: null,
+      image: null,
       variables: { a, b, c, func },
       correctAnswer: `\\frac{${num}}{${den}}`,
       distractors: [
@@ -86,8 +86,8 @@ class TrigGeometryGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Dany jest trójkąt o bokach $$${a}$$ i $$${b}$$ oraz kącie między nimi $$${angle}^\\circ$$. Oblicz pole tego trójkąta.`,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({ type: "triangle_sas", a, b, angle }),
+      latex: null,
+      image: null,
       variables: { a, b, angle },
       correctAnswer: areaStr,
       distractors: [`${a * b}`, `${coeff}`, `${coeff}\\sqrt{2}`],
@@ -120,8 +120,8 @@ class TrigGeometryGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Boki równoległoboku mają długości $$${a}$$ i $$${b}$$, a kąt między nimi ma miarę $$${angle}^\\circ$$. Pole tego równoległoboku jest równe:`,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({ type: "parallelogram", a, b, angle }),
+      latex: null,
+      image: null,
       variables: { a, b, angle },
       correctAnswer: areaStr,
       distractors: [`${a * b}`, `${a * b * 2}`, `${a + b}`],
@@ -138,25 +138,64 @@ class TrigGeometryGenerator extends BaseGenerator {
 
     const a = MathUtils.randomInt(4, 10);
     const angle = MathUtils.randomElement(angles);
-
-    let areaStr;
     const aSq = a * a;
 
-    if (angle === 30) {
-      areaStr = Number.isInteger(aSq / 2) ? `${aSq / 2}` : (aSq / 2).toFixed(1);
-    } else if (angle === 45) {
-      areaStr = `${aSq / 2}\\sqrt{2}`;
-    } else {
-      areaStr = `${aSq / 2}\\sqrt{3}`;
+    const formatResult = (ang) => {
+      if (ang === 30) {
+        const val = aSq / 2;
+        return Number.isInteger(val) ? `${val}` : val.toFixed(1);
+      }
+      const root = ang === 45 ? 2 : 3;
+      if (aSq % 2 === 0) {
+        return `${aSq / 2}\\sqrt{${root}}`;
+      } else {
+        return `\\frac{${aSq}\\sqrt{${root}}}{2}`;
+      }
+    };
+
+    const areaStr = formatResult(angle);
+
+    const candidates = [
+      `${aSq}`,
+      `${4 * a}`,
+      formatResult(30),
+      formatResult(45),
+      formatResult(60),
+      `${(aSq / 4).toFixed(aSq % 4 === 0 ? 0 : 1)}`,
+      `${aSq * 2}`,
+      `${aSq}\\sqrt{2}`,
+      `${aSq}\\sqrt{3}`,
+    ];
+
+    const uniqueDistractors = [];
+    const usedValues = new Set();
+    usedValues.add(areaStr);
+
+    for (const val of candidates) {
+      if (!usedValues.has(val)) {
+        uniqueDistractors.push(val);
+        usedValues.add(val);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
+    let offset = 1;
+    while (uniqueDistractors.length < 3) {
+      const val = `${aSq + offset}`;
+      if (!usedValues.has(val)) {
+        uniqueDistractors.push(val);
+        usedValues.add(val);
+      }
+      offset = offset > 0 ? -offset : -offset + 1;
     }
 
     return this.createResponse({
       question: `Bok rombu ma długość $$${a}$$, a kąt ostry ma miarę $$${angle}^\\circ$$. Pole tego rombu wynosi:`,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({ type: "rhombus_angle", a, angle }),
+      latex: null,
+      image: null,
       variables: { a, angle },
       correctAnswer: areaStr,
-      distractors: [`${a * a}`, `${a * 4}`, `${(a * a) / 4}`],
+      distractors: uniqueDistractors,
       steps: [`$$P = a^2 \\sin\\alpha$$`],
       questionType: "closed",
     });
@@ -180,8 +219,8 @@ class TrigGeometryGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Podstawa trójkąta równoramiennego ma długość $$${a}$$, a kąt przy podstawie ma miarę $$${angle}^\\circ$$. Jaką długość ma ramię tego trójkąta?`,
-      latex: ``,
-      image: TrigSVGUtils.generateSVG({ type: "isosceles", a, angle }),
+      latex: null,
+      image: null,
       variables: { a, angle },
       correctAnswer: armLatex,
       distractors: [`${a}`, `${a}\\sqrt{3}`, `${a / 2}`],
@@ -208,7 +247,7 @@ class TrigGeometryGenerator extends BaseGenerator {
     return this.createResponse({
       question: `Ramię trapezu równoramiennego ma długość $$${c}$$, a kąt ostry tego trapezu ma miarę $$${angle}^\\circ$$. Oblicz wysokość tego trapezu.`,
       latex: null,
-      image: TrigSVGUtils.generateSVG({ type: "trapezoid_h", c, angle }),
+      image: null,
       variables: { c, angle },
       correctAnswer: hStr,
       distractors: [`${c}`, `${c}\\sqrt{2}`, `${c * 2}`],
