@@ -52,7 +52,7 @@ class FunctionPropertiesGenerator extends BaseGenerator {
 
     return this.createResponse({
       question: `Punkt $$A = (${x0}, m)$$ należy do wykresu funkcji $$${formula}$$. Zatem:`,
-      latex: `A = (${x0}, m)`,
+      latex: null,
       image: null,
       variables: { x0, m },
       correctAnswer: `m = ${m}`,
