@@ -203,7 +203,11 @@ class FunctionPropertiesGenerator extends BaseGenerator {
       image: null,
       variables: { a, c1, c2, c3 },
       correctAnswer: `${result}`,
-      distractors: [`${result + c1}`, `${-result}`, `${result - 10}`],
+      distractors: [
+        `${result + c1 + 2 * c3}`,
+        `${result + 2 * c1 + c2}`,
+        `${result - 10}`,
+      ],
       steps: [
         `Podstawiamy $$x = ${a}$$ do wzoru funkcji.`,
         `$$f(${a}) = ${result}$$`,
@@ -215,19 +219,57 @@ class FunctionPropertiesGenerator extends BaseGenerator {
   generateSVG(params) {
     const size = 300;
     const center = size / 2;
-    const scale = 20;
-    let svg = `<line x1="0" y1="${center}" x2="${size}" y2="${center}" stroke="#333" stroke-width="1" /><line x1="${center}" y1="0" x2="${center}" y2="${size}" stroke="#333" stroke-width="1" /><text x="${size - 15}" y="${center + 15}">x</text><text x="${center + 10}" y="15">y</text>`;
+    const scale = 20; // 20px
+
+    let grid = "";
+    for (let i = -7; i <= 7; i++) {
+      if (i === 0) continue;
+
+      const pos = i * scale;
+      const screenX = center + pos;
+      const screenY = center - pos;
+
+      // X
+      grid += `<line x1="${screenX}" y1="0" x2="${screenX}" y2="${size}" stroke="#f0f0f0" stroke-width="1" />`;
+      // Y
+      grid += `<line x1="0" y1="${screenY}" x2="${size}" y2="${screenY}" stroke="#f0f0f0" stroke-width="1" />`;
+
+      // kreski na X
+      grid += `<line x1="${screenX}" y1="${center - 3}" x2="${screenX}" y2="${center + 3}" stroke="#888" stroke-width="1" />`;
+      // liczby na X
+      grid += `<text x="${screenX}" y="${center + 15}" font-size="10" text-anchor="middle" fill="#666">${i}</text>`;
+
+      // kreski na Y
+      grid += `<line x1="${center - 3}" y1="${screenY}" x2="${center + 3}" y2="${screenY}" stroke="#888" stroke-width="1" />`;
+      // liczby na Y
+      grid += `<text x="${center - 6}" y="${screenY + 3}" font-size="10" text-anchor="end" fill="#666">${i}</text>`;
+    }
+
+    const axes = `
+      <line x1="0" y1="${center}" x2="${size}" y2="${center}" stroke="#333" stroke-width="2" />
+      <line x1="${center}" y1="0" x2="${center}" y2="${size}" stroke="#333" stroke-width="2" />
+      <text x="${size - 10}" y="${center + 15}" font-weight="bold" font-size="12">x</text>
+      <text x="${center + 10}" y="15" font-weight="bold" font-size="12">y</text>
+      <text x="${center - 10}" y="${center + 15}" font-size="10" fill="#666">0</text>
+    `;
+
+    let graph = "";
     if (params.type === "polyline") {
       let pts = "";
       params.points.forEach((p) => {
         const sx = center + p.x * scale;
         const sy = center - p.y * scale;
         pts += `${sx},${sy} `;
-        svg += `<circle cx="${sx}" cy="${sy}" r="3" fill="blue" />`;
+        graph += `<circle cx="${sx}" cy="${sy}" r="3" fill="blue" />`;
       });
-      svg += `<polyline points="${pts}" fill="none" stroke="blue" stroke-width="2" />`;
+      graph += `<polyline points="${pts}" fill="none" stroke="blue" stroke-width="2" />`;
     }
-    return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ddd; background:#fff">${svg}</svg>`;
+
+    return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ddd; background:#fff">
+      ${grid}
+      ${axes}
+      ${graph}
+    </svg>`;
   }
 }
 
