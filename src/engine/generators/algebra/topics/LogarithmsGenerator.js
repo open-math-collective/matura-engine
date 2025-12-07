@@ -28,8 +28,7 @@ class LogarithmsGenerator extends BaseGenerator {
     const X = Y * ratio;
 
     return this.createResponse({
-      question:
-        "Wartość wyrażenia $$\\log_{${base}} ${X} - \\log_{${base}} ${Y}$$ jest równa:",
+      question: `Wartość wyrażenia $$\\log_{${base}} ${X} - \\log_{${base}} ${Y}$$ jest równa:`,
       latex: null,
       image: null,
       variables: { base, X, Y, result },
@@ -85,7 +84,7 @@ class LogarithmsGenerator extends BaseGenerator {
     const y = numerator / total;
 
     return this.createResponse({
-      question: "Wartość wyrażenia jest równa:",
+      question: "Ile wynosi wartość poniższego wyrażenia?",
       latex: `${k}\\log_{${base}} ${realX} - \\log_{${base}} ${y}`,
       image: null,
       variables: { base, k, realX, y, p },
