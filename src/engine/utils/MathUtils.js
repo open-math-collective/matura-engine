@@ -28,6 +28,20 @@ class MathUtils {
 
     return text;
   }
+
+  static ensureUniqueDistractors(correctAnswer, distractors, generateFallback) {
+    const unique = new Set(distractors.filter((d) => d !== correctAnswer));
+
+    let attempts = 0;
+    while (unique.size < 3 && attempts < 20) {
+      const fallback = generateFallback();
+      if (fallback !== correctAnswer) {
+        unique.add(fallback);
+      }
+      attempts++;
+    }
+    return Array.from(unique).slice(0, 3);
+  }
 }
 
 module.exports = MathUtils;

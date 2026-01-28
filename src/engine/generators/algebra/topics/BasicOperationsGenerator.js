@@ -38,11 +38,18 @@ class BasicOperationsGenerator extends BaseGenerator {
       image: null,
       variables: { base, n, k, m, finalExp },
       correctAnswer: `${base}^{${finalExp}}`,
-      distractors: [
-        `${base}^{${n + k - m}}`,
-        `${base}^{${finalExp * -1}}`,
-        `${baseSq}^{${finalExp + 1}}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${base}^{${finalExp}}`,
+        [
+          `${base}^{${n + k - m}}`,
+          `${base}^{${finalExp * -1}}`,
+          `${baseSq}^{${finalExp + 1}}`,
+        ],
+        () => {
+          const e = finalExp + MathUtils.randomElement([-1, 1, -2, 2, 3]);
+          return `${base}^{${e}}`;
+        },
+      ),
       steps: [
         `Sprowadzamy do podstawy $$${base}$$: $$${baseSq} = ${base}^2$$.`,
         `$$(${base}^2)^{${k}} = ${base}^{${2 * k}}$$`,
@@ -92,11 +99,19 @@ class BasicOperationsGenerator extends BaseGenerator {
       image: null,
       variables: { root, f1, f2, largeVal, smallVal },
       correctAnswer: correctAnswer,
-      distractors: [
-        `\\sqrt{${op === "-" ? largeVal - smallVal : largeVal + smallVal}}`,
-        `${resultFactor * root}`,
-        `${op === "-" ? f1 + f2 : f1 - f2}\\sqrt{${root}}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        correctAnswer,
+        [
+          `\\sqrt{${op === "-" ? largeVal - smallVal : largeVal + smallVal}}`,
+          `${resultFactor * root}`,
+          `${op === "-" ? f1 + f2 : f1 - f2}\\sqrt{${root}}`,
+        ],
+        () => {
+          const fakeFactor =
+            resultFactor + MathUtils.randomElement([-1, 1, 2, -2]);
+          return `${fakeFactor}\\sqrt{${root}}`;
+        },
+      ),
       steps: [
         `$$\\sqrt{${largeVal}} = ${f1}\\sqrt{${root}}$$`,
         `$$\\sqrt{${smallVal}} = ${f2}\\sqrt{${root}}$$`,
@@ -154,11 +169,17 @@ class BasicOperationsGenerator extends BaseGenerator {
       image: null,
       variables: { a_base, b_base, k, m },
       correctAnswer: `${formatNum(finalMantissa)} \\cdot 10^{${finalExponent}}`,
-      distractors: [
-        `${formatNum(finalMantissa)} \\cdot 10^{${k - m}}`,
-        `${formatNum(mantissa * 10)} \\cdot 10^{${exponent + 1}}`,
-        `${formatNum(a_base - b_base)} \\cdot 10^{${k - m}}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${formatNum(finalMantissa)} \\cdot 10^{${finalExponent}}`,
+        [
+          `${formatNum(finalMantissa)} \\cdot 10^{${k - m}}`,
+          `${formatNum(mantissa * 10)} \\cdot 10^{${exponent + 1}}`,
+          `${formatNum(a_base - b_base)} \\cdot 10^{${k - m}}`,
+        ],
+        () => {
+          return `${formatNum(finalMantissa)} \\cdot 10^{${finalExponent + MathUtils.randomElement([-1, 1, 2])}}`;
+        },
+      ),
       steps: [
         `$$${formatNum(a_base)}:${formatNum(b_base)}=${formatNum(mantissa)}$$`,
         `$$10^{${k}}:10^{${m}}=10^{${k - m}}$$`,
@@ -205,11 +226,19 @@ class BasicOperationsGenerator extends BaseGenerator {
       image: null,
       variables: { a, n, m },
       correctAnswer: `${a}^{\\frac{${finalNum}}{${finalDen}}}`,
-      distractors: [
-        `${a}^{\\frac{${m}}{${n + 2}}}`,
-        `${a}^{\\frac{${resNum}}{${n}}}`,
-        `${a}^{\\frac{${finalDen}}{${finalNum}}}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${a}^{\\frac{${finalNum}}{${finalDen}}}`,
+        [
+          `${a}^{\\frac{${m}}{${n + 2}}}`,
+          `${a}^{\\frac{${resNum}}{${n}}}`,
+          `${a}^{\\frac{${finalDen}}{${finalNum}}}`,
+        ],
+        () => {
+          const num = finalNum + MathUtils.randomElement([-1, 1]);
+          const den = finalDen + MathUtils.randomElement([0, 1]);
+          return `${a}^{\\frac{${num}}{${den}}}`;
+        },
+      ),
       steps: [
         `Zamieniamy pierwiastek na potęgę: $$\\sqrt[n]{a^m} = a^{\\frac{m}{n}}$$`,
         `Mnożenie potęg: dodajemy wykładniki $$\\frac{${m}}{${n}} + \\frac{1}{2}$$`,

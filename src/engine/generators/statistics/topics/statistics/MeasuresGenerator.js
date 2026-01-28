@@ -67,13 +67,20 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { numbers },
       correctAnswer: answer,
-      distractors: [
-        `${(sum / (count - 1)).toFixed(2)}`,
-        mode === "mean"
-          ? `${sorted[Math.floor(count / 2)]}`
-          : `${(sum / count).toFixed(2)}`,
-        `${sorted[0]}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        answer,
+        [
+          `${(sum / (count - 1)).toFixed(2)}`,
+          mode === "mean"
+            ? `${sorted[Math.floor(count / 2)]}`
+            : `${(sum / count).toFixed(2)}`,
+          `${sorted[0]}`,
+        ],
+        () => {
+          const val = parseFloat(answer) || 0;
+          return `${(val + MathUtils.randomElement([-1, 1, 0.5, -0.5]) * MathUtils.randomInt(1, 3)).toFixed(2)}`;
+        },
+      ),
       steps: steps,
       questionType: "closed",
     });
@@ -103,7 +110,11 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { targetMode },
       correctAnswer: `${targetMode}`,
-      distractors: [`${numbers[0]}`, `${numbers[1]}`, `${numbers[2]}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${targetMode}`,
+        [`${numbers[0]}`, `${numbers[1]}`, `${numbers[2]}`],
+        () => `${MathUtils.randomInt(1, 9)}`,
+      ),
       steps: [`Liczba $$${targetMode}$$ występuje najczęściej.`],
       questionType: "closed",
     });
@@ -136,11 +147,18 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { mean },
       correctAnswer: meanStr,
-      distractors: [
-        `${(mean + 0.5).toFixed(2)}`,
-        `${(mean - 0.5).toFixed(2)}`,
-        `${Math.floor(mean)}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        meanStr,
+        [
+          `${(mean + 0.5).toFixed(2)}`,
+          `${(mean - 0.5).toFixed(2)}`,
+          `${Math.floor(mean)}`,
+        ],
+        () => {
+          const m = parseFloat(meanStr);
+          return `${(m + MathUtils.randomElement([-0.1, 0.1, -1, 1])).toFixed(2)}`;
+        },
+      ),
       steps: [`Licznik: ${num}, Mianownik: ${den}, Wynik: ${meanStr}`],
       questionType: "closed",
     });
@@ -179,11 +197,18 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { nums, mean, variance },
       correctAnswer: this.difficulty === "easy" ? `2` : stdDevStr,
-      distractors: [
-        `${variance}`,
-        `${mean}`,
-        `${this.difficulty === "easy" ? 4 : variance + 2}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        this.difficulty === "easy" ? `2` : stdDevStr,
+        [
+          `${variance}`,
+          `${mean}`,
+          `${this.difficulty === "easy" ? 4 : variance + 2}`,
+        ],
+        () => {
+          const v = variance + MathUtils.randomElement([-1, 1, 2]);
+          return `${v}`;
+        },
+      ),
       steps: [`Średnia: ${mean}`, `Wariancja: ${variance}`, `Odchylenie: ...`],
       questionType: "closed",
     });
@@ -218,7 +243,11 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { known, targetMean, x },
       correctAnswer: `${x}`,
-      distractors: [`${x + 1}`, `${x - 2}`, `${targetMean}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${x}`,
+        [`${x + 1}`, `${x - 2}`, `${targetMean}`],
+        () => `${x + MathUtils.randomElement([-3, 3, 4, -4])}`,
+      ),
       steps: [
         `Suma musi wynosić $$${count} \\cdot ${targetMean} = ${targetSum}$$`,
         `$$x = ${targetSum} - ${currentSum} = ${x}$$`,
@@ -242,7 +271,11 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { a, b, x, c, M },
       correctAnswer: `${x}`,
-      distractors: [`${M}`, `${2 * M}`, `${b}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${x}`,
+        [`${M}`, `${2 * M}`, `${b}`],
+        () => `${x + MathUtils.randomElement([-1, 1, 2, -2])}`,
+      ),
       steps: [
         `$$M = \\frac{b+x}{2} \\implies 2M = b+x \\implies x = 2M - b = ${x}$$`,
       ],
@@ -264,7 +297,11 @@ class MeasuresGenerator extends BaseGenerator {
       image: null,
       variables: { n, S1, S2, x },
       correctAnswer: `${x}`,
-      distractors: [`${x - 1}`, `${S2}`, `${S1}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${x}`,
+        [`${x - 1}`, `${S2}`, `${S1}`],
+        () => `${x + MathUtils.randomElement([-2, 2, 3])}`,
+      ),
       steps: [
         `Suma stara: ${sum1}`,
         `Suma nowa: ${sum2}`,
