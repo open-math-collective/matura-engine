@@ -1,24 +1,15 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
+const NumbersValues = require("../values/NumbersValues");
 
 class NumbersGenerator extends BaseGenerator {
   generatePercentProblem() {
-    let pList, priceRange;
-
-    if (this.difficulty === "easy") {
-      pList = [10, 20, 25, 50];
-      priceRange = [20, 100];
-    } else if (this.difficulty === "hard") {
-      pList = [5, 15, 35, 45, 12, 8];
-      priceRange = [150, 500];
-    } else {
-      pList = [10, 20, 25, 30, 40, 50];
-      priceRange = [20, 200];
-    }
+    const { pList, priceRange } = NumbersValues.getPercentProblemValues(
+      this.difficulty,
+    );
 
     const p = MathUtils.randomElement(pList);
-    const originalPrice =
-      MathUtils.randomInt(priceRange[0] / 10, priceRange[1] / 10) * 10;
+    const originalPrice = MathUtils.randomInt(priceRange[0], priceRange[1]);
 
     const finalPrice = originalPrice * (1 - p / 100);
 
@@ -45,63 +36,33 @@ class NumbersGenerator extends BaseGenerator {
   }
 
   generatePercentRelations() {
-    let scenarios;
-
-    if (this.difficulty === "easy") {
-      scenarios = [
-        { p: 100, b_frac: "0.5" }, // 2x -> 0.5
-        { p: 50, b_frac: "\\frac{2}{3}" }, // 1.5x -> 2/3
-      ];
-    } else if (this.difficulty === "hard") {
-      scenarios = [
-        { p: 150, b_frac: "0.4" }, // 2.5x -> 0.4
-        { p: 125, b_frac: "\\frac{4}{9}" }, // 2.25x -> 4/9
-        { p: 300, b_frac: "0.25" }, // 4x -> 0.25
-      ];
-    } else {
-      scenarios = [
-        { p: 25, b_frac: "0.8" },
-        { p: 60, b_frac: "0.625" },
-        { p: 20, b_frac: "\\frac{5}{6}" },
-      ];
-    }
-
-    const s = MathUtils.randomElement(scenarios);
+    const s = NumbersValues.getPercentRelationsValues(this.difficulty);
 
     return this.createResponse({
-      question: `Liczba $$x$$ jest o $$${s.p}\\%$$ większa od liczby $$y$$. Wynika stąd, że $$y=?$$`,
+      question: `Liczba $$${s.varX}$$ jest o $$${s.p}\\%$$ większa od liczby $$${s.varY}$$. Wynika stąd, że $$${s.varY}=?$$`,
       latex: null,
       image: null,
-      variables: { p: s.p },
-      correctAnswer: `y = ${s.b_frac}x`,
+      variables: { p: s.p, varX: s.varX, varY: s.varY },
+      correctAnswer: `${s.varY} = ${s.b_frac}${s.varX}`,
       distractors: [
-        `y = ${1 + s.p / 100}x`,
-        `y = ${Math.abs(1 - s.p / 100)
+        `${s.varY} = ${1 + s.p / 100}${s.varX}`,
+        `${s.varY} = ${Math.abs(1 - s.p / 100)
           .toFixed(2)
-          .replace("0.", ".")}x`,
-        `y = ${s.p / 100}x`,
+          .replace("0.", ".")}${s.varX}`,
+        `${s.varY} = ${s.p / 100}${s.varX}`,
       ],
       steps: [
-        `$$x = ${1 + s.p / 100}y$$`,
-        `$$y = x : ${1 + s.p / 100} = ${s.b_frac}x$$`,
+        `$$${s.varX} = ${1 + s.p / 100}${s.varY}$$`,
+        `$$${s.varY} = ${s.varX} : ${1 + s.p / 100} = ${s.b_frac}${s.varX}$$`,
       ],
       questionType: "closed",
     });
   }
 
   generateErrorProblem() {
-    let errorList, xRange;
-
-    if (this.difficulty === "easy") {
-      errorList = [1, 2, 5, 10];
-      xRange = [10, 100];
-    } else if (this.difficulty === "hard") {
-      errorList = [0.5, 1.5, 2.5, 12];
-      xRange = [150, 500];
-    } else {
-      errorList = [5, 10, 20, 25];
-      xRange = [20, 200];
-    }
+    const { errorList, xRange } = NumbersValues.getErrorProblemValues(
+      this.difficulty,
+    );
 
     const errorPercent = MathUtils.randomElement(errorList);
     const x = MathUtils.randomInt(xRange[0] / 10, xRange[1] / 10) * 10;
@@ -133,18 +94,9 @@ class NumbersGenerator extends BaseGenerator {
   }
 
   generateGcdLcm() {
-    let commonList, mRange;
-
-    if (this.difficulty === "easy") {
-      commonList = [2, 3, 4, 5, 10];
-      mRange = [1, 3];
-    } else if (this.difficulty === "hard") {
-      commonList = [12, 14, 15, 18, 24];
-      mRange = [3, 8];
-    } else {
-      commonList = [4, 6, 8, 9, 12];
-      mRange = [2, 5];
-    }
+    const { commonList, mRange } = NumbersValues.getGcdLcmValues(
+      this.difficulty,
+    );
 
     const common = MathUtils.randomElement(commonList);
     const m1 = MathUtils.randomInt(mRange[0], mRange[1]);
@@ -185,19 +137,6 @@ class NumbersGenerator extends BaseGenerator {
   }
   getLCM(a, b) {
     return (a * b) / this.getGCD(a, b);
-  }
-  getPrimeFactors(n) {
-    const factors = [];
-    let d = 2;
-    while (d * d <= n) {
-      while (n % d === 0) {
-        factors.push(d);
-        n /= d;
-      }
-      d++;
-    }
-    if (n > 1) factors.push(n);
-    return factors;
   }
 }
 
