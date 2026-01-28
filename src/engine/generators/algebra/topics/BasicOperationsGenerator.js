@@ -7,10 +7,10 @@ class BasicOperationsGenerator extends BaseGenerator {
     let bases, nRange, kRange, mRange;
 
     if (this.difficulty === "easy") {
-      bases = MathUtils.randomInt(2, 50);
-      nRange = [-20, 30];
-      kRange = [-15, 20];
-      mRange = [-15, 20];
+      bases = MathUtils.randomInt(2, 100);
+      nRange = [-30, 40];
+      kRange = [-20, 25];
+      mRange = [-20, 25];
     } else if (this.difficulty === "hard") {
       bases = MathUtils.randomInt(2, 200);
       nRange = [-500, 500];
@@ -211,9 +211,12 @@ class BasicOperationsGenerator extends BaseGenerator {
     let aList, nRange, mRange;
 
     if (this.difficulty === "easy") {
-      aList = [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-      nRange = [2, 30];
-      mRange = [1, 30];
+      aList = [
+        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+        22, 23, 24, 25, 30, 40,
+      ];
+      nRange = [2, 50];
+      mRange = [1, 50];
     } else if (this.difficulty === "hard") {
       const largeBases = [];
       for (let i = 2; i <= 500; i++) largeBases.push(i);
