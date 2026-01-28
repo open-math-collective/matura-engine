@@ -1,29 +1,13 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
+const FormulasValues = require("../values/FormulasValues");
 
 class FormulasGenerator extends BaseGenerator {
   generateShortMultProblem() {
     // (sqrt(a) +/- b)^2
-    let aList, bRange;
-
-    if (this.difficulty === "easy") {
-      aList = [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 20];
-      bRange = [1, 50];
-    } else if (this.difficulty === "hard") {
-      const largeAList = [];
-      const isPerfectSquare = (n) => Number.isInteger(Math.sqrt(n));
-      for (let i = 2; i <= 2000; i++) {
-        if (!isPerfectSquare(i)) largeAList.push(i);
-      }
-      aList = largeAList;
-      bRange = [5, 2000];
-    } else {
-      aList = [
-        2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23,
-        24, 26, 27, 28, 30,
-      ];
-      bRange = [2, 300];
-    }
+    const { aList, bRange } = FormulasValues.getShortMultParams(
+      this.difficulty,
+    );
 
     const a = MathUtils.randomElement(aList);
     const b = MathUtils.randomInt(bRange[0], bRange[1]);
@@ -57,18 +41,9 @@ class FormulasGenerator extends BaseGenerator {
 
   generateAlgebraicExpansion() {
     // (ax - b)^2 - (ax + b)^2
-    let aRange, bRange;
-
-    if (this.difficulty === "easy") {
-      aRange = [1, 30];
-      bRange = [1, 50];
-    } else if (this.difficulty === "hard") {
-      aRange = [5, 2000];
-      bRange = [5, 5000];
-    } else {
-      aRange = [2, 200];
-      bRange = [2, 500];
-    }
+    const { aRange, bRange } = FormulasValues.getExpansionParams(
+      this.difficulty,
+    );
 
     const a = MathUtils.randomInt(aRange[0], aRange[1]);
     const b = MathUtils.randomInt(bRange[0], bRange[1]);
@@ -101,18 +76,9 @@ class FormulasGenerator extends BaseGenerator {
     // easy/medium: (x^2 - a^2)/(x-a)
     // hard: (k^2*x^2 - a^2)/(kx-a) -> kx + a
 
-    let aRange, kRange;
-
-    if (this.difficulty === "easy") {
-      aRange = [1, 50];
-      kRange = [1, 10];
-    } else if (this.difficulty === "hard") {
-      aRange = [5, 5000];
-      kRange = [2, 1000];
-    } else {
-      aRange = [2, 200];
-      kRange = [1, 50];
-    }
+    const { aRange, kRange } = FormulasValues.getRationalParams(
+      this.difficulty,
+    );
 
     const type = MathUtils.randomElement(["diff_squares", "perfect_square"]);
     const a = MathUtils.randomInt(aRange[0], aRange[1]);
