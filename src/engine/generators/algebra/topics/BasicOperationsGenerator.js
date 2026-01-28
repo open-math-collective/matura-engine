@@ -7,10 +7,10 @@ class BasicOperationsGenerator extends BaseGenerator {
     let bases, nRange, kRange, mRange;
 
     if (this.difficulty === "easy") {
-      bases = MathUtils.randomInt(2, 20);
-      nRange = [-15, 20];
-      kRange = [-10, 15];
-      mRange = [-10, 15];
+      bases = MathUtils.randomInt(2, 50);
+      nRange = [-20, 30];
+      kRange = [-15, 20];
+      mRange = [-15, 20];
     } else if (this.difficulty === "hard") {
       bases = MathUtils.randomInt(2, 200);
       nRange = [-500, 500];
@@ -18,10 +18,10 @@ class BasicOperationsGenerator extends BaseGenerator {
       mRange = [-500, 500];
     } else {
       // medium
-      bases = MathUtils.randomInt(2, 50);
-      nRange = [-50, 50];
-      kRange = [-30, 30];
-      mRange = [-50, 50];
+      bases = MathUtils.randomInt(2, 100);
+      nRange = [-100, 100];
+      kRange = [-50, 50];
+      mRange = [-100, 100];
     }
 
     const base = Number.isInteger(bases)
@@ -67,9 +67,11 @@ class BasicOperationsGenerator extends BaseGenerator {
     let roots, f1Range, f2Range, opList;
 
     if (this.difficulty === "easy") {
-      roots = MathUtils.randomElement([2, 3, 5, 6, 7, 8, 10, 11, 12]);
-      f1Range = [2, 15];
-      f2Range = [1, 10];
+      roots = MathUtils.randomElement([
+        2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 20,
+      ]);
+      f1Range = [2, 50];
+      f2Range = [1, 40];
       opList = ["+", "-"];
     } else if (this.difficulty === "hard") {
       const largeRoots = [];
@@ -82,9 +84,12 @@ class BasicOperationsGenerator extends BaseGenerator {
       f2Range = [5, 500];
       opList = ["-", "+"];
     } else {
-      roots = MathUtils.randomElement([2, 3, 5, 7, 10, 11, 13, 14, 15]);
-      f1Range = [5, 30];
-      f2Range = [2, 20];
+      roots = MathUtils.randomElement([
+        2, 3, 5, 7, 10, 11, 13, 14, 15, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28,
+        30, 31, 33, 34, 35, 37,
+      ]);
+      f1Range = [5, 100];
+      f2Range = [2, 80];
       opList = ["-", "+"];
     }
 
@@ -134,9 +139,9 @@ class BasicOperationsGenerator extends BaseGenerator {
     let bBaseRange, multipliers, expRange;
 
     if (this.difficulty === "easy") {
-      bBaseRange = [2, 50];
-      multipliers = [2, 3, 4, 5, 6, 8, 10, 0.5, 0.1];
-      expRange = [2, 30];
+      bBaseRange = [2, 100];
+      multipliers = [2, 3, 4, 5, 6, 8, 10, 0.5, 0.1, 0.2, 2.5, 1.5];
+      expRange = [2, 50];
     } else if (this.difficulty === "hard") {
       bBaseRange = [2, 1000];
       const mults = [
@@ -147,9 +152,9 @@ class BasicOperationsGenerator extends BaseGenerator {
       multipliers = mults;
       expRange = [-500, 500];
     } else {
-      bBaseRange = [2, 200];
-      multipliers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1.5, 2.5, 0.5, 1.2];
-      expRange = [-100, 100];
+      bBaseRange = [2, 500];
+      multipliers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1.5, 2.5, 0.5, 1.2, 0.8, 0.4];
+      expRange = [-200, 200];
     }
 
     const b_base = MathUtils.randomInt(bBaseRange[0], bBaseRange[1]);
@@ -206,9 +211,9 @@ class BasicOperationsGenerator extends BaseGenerator {
     let aList, nRange, mRange;
 
     if (this.difficulty === "easy") {
-      aList = [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
-      nRange = [2, 15];
-      mRange = [1, 15];
+      aList = [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+      nRange = [2, 30];
+      mRange = [1, 30];
     } else if (this.difficulty === "hard") {
       const largeBases = [];
       for (let i = 2; i <= 500; i++) largeBases.push(i);
@@ -217,10 +222,10 @@ class BasicOperationsGenerator extends BaseGenerator {
       mRange = [2, 2000];
     } else {
       const medBases = [];
-      for (let i = 2; i <= 50; i++) medBases.push(i);
+      for (let i = 2; i <= 100; i++) medBases.push(i);
       aList = medBases;
-      nRange = [2, 50];
-      mRange = [2, 100];
+      nRange = [2, 100];
+      mRange = [2, 200];
     }
 
     const a = MathUtils.randomElement(aList);

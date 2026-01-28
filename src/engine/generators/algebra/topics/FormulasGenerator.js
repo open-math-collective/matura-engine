@@ -7,14 +7,22 @@ class FormulasGenerator extends BaseGenerator {
     let aList, bRange;
 
     if (this.difficulty === "easy") {
-      aList = [2, 3];
-      bRange = [1, 3];
+      aList = [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 20];
+      bRange = [1, 50];
     } else if (this.difficulty === "hard") {
-      aList = [2, 3, 5, 6, 7, 8, 10];
-      bRange = [5, 12];
+      const largeAList = [];
+      const isPerfectSquare = (n) => Number.isInteger(Math.sqrt(n));
+      for (let i = 2; i <= 2000; i++) {
+        if (!isPerfectSquare(i)) largeAList.push(i);
+      }
+      aList = largeAList;
+      bRange = [5, 2000];
     } else {
-      aList = [2, 3, 5, 7];
-      bRange = [2, 5];
+      aList = [
+        2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23,
+        24, 26, 27, 28, 30,
+      ];
+      bRange = [2, 300];
     }
 
     const a = MathUtils.randomElement(aList);
@@ -52,14 +60,14 @@ class FormulasGenerator extends BaseGenerator {
     let aRange, bRange;
 
     if (this.difficulty === "easy") {
-      aRange = [1, 1];
-      bRange = [1, 4];
+      aRange = [1, 30];
+      bRange = [1, 50];
     } else if (this.difficulty === "hard") {
-      aRange = [4, 9];
-      bRange = [5, 10];
+      aRange = [5, 2000];
+      bRange = [5, 5000];
     } else {
-      aRange = [2, 4];
-      bRange = [2, 5];
+      aRange = [2, 200];
+      bRange = [2, 500];
     }
 
     const a = MathUtils.randomInt(aRange[0], aRange[1]);
@@ -96,14 +104,14 @@ class FormulasGenerator extends BaseGenerator {
     let aRange, kRange;
 
     if (this.difficulty === "easy") {
-      aRange = [1, 4];
-      kRange = [1, 1];
+      aRange = [1, 50];
+      kRange = [1, 10];
     } else if (this.difficulty === "hard") {
-      aRange = [3, 9];
-      kRange = [2, 5];
+      aRange = [5, 5000];
+      kRange = [2, 1000];
     } else {
-      aRange = [2, 9];
-      kRange = [1, 1];
+      aRange = [2, 200];
+      kRange = [1, 50];
     }
 
     const type = MathUtils.randomElement(["diff_squares", "perfect_square"]);
