@@ -1,59 +1,17 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
 
+const IntervalsValues = require("../values/IntervalsValues");
+
 class IntervalsGenerator extends BaseGenerator {
   generateAbsValueProblem() {
     // |x - a| < b
-    let a, b, x1, x2, valA, valB, valX1, valX2;
+    const { a, b, x1, x2, valA, valB, valX1, valX2 } =
+      IntervalsValues.getAbsValueValues(this.difficulty);
+
     const sign = MathUtils.randomElement(["<", ">", "\\le", "\\ge"]);
     const isInside = sign === "<" || sign === "\\le";
     const isClosed = sign === "\\le" || sign === "\\ge";
-
-    if (this.difficulty === "hard") {
-      const [an, ad] = MathUtils.randomFraction(-10, 10, [2, 6]);
-      const [bn, bd] = MathUtils.randomFraction(1, 10, [2, 6]);
-
-      a = { n: an, d: ad };
-      b = { n: bn, d: bd };
-
-      valA = MathUtils.toLatexFraction(an, ad);
-      valB = MathUtils.toLatexFraction(bn, bd);
-
-      const subNum = an * bd - bn * ad;
-      const subDen = ad * bd;
-      const [sN, sD] = MathUtils.reduceFraction(subNum, subDen);
-
-      const addNum = an * bd + bn * ad;
-      const addDen = ad * bd;
-      const [aN, aD] = MathUtils.reduceFraction(addNum, addDen);
-
-      x1 = subNum / subDen;
-      x2 = addNum / addDen;
-
-      valX1 = MathUtils.toLatexFraction(sN, sD);
-      valX2 = MathUtils.toLatexFraction(aN, aD);
-    } else {
-      let centerRange, radiusRange;
-      if (this.difficulty === "easy") {
-        centerRange = [-300, 300];
-        radiusRange = [1, 200];
-      } else {
-        centerRange = [-1000, 1000];
-        radiusRange = [1, 500];
-      }
-
-      a = MathUtils.randomInt(centerRange[0], centerRange[1]);
-      b = MathUtils.randomInt(radiusRange[0], radiusRange[1]);
-
-      valA = `${a}`;
-      valB = `${b}`;
-
-      x1 = a - b;
-      x2 = a + b;
-
-      valX1 = `${x1}`;
-      valX2 = `${x2}`;
-    }
 
     const formatSet = (s, e, inside, closed) => {
       const bL = closed ? "\\langle" : "(";
@@ -111,35 +69,9 @@ class IntervalsGenerator extends BaseGenerator {
 
   generateIntervalOpsProblem() {
     // A u B / A n B
-    let valA, valB, numA, numB;
-
-    if (this.difficulty === "hard") {
-      const [an, ad] = MathUtils.randomFraction(-10, 10, [2, 5]);
-      numA = an / ad;
-      valA = MathUtils.toLatexFraction(an, ad);
-
-      const offset = MathUtils.randomElement([
-        -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2,
-      ]);
-      numB = numA + offset;
-
-      const [bn, bd] = MathUtils.randomFraction(
-        Math.floor(numA) - 2,
-        Math.ceil(numA) + 2,
-        [2, 5],
-      );
-      numB = bn / bd;
-      valB = MathUtils.toLatexFraction(bn, bd);
-    } else {
-      const range = this.difficulty === "easy" ? [-300, 300] : [-1000, 1000];
-      numA = MathUtils.randomInt(range[0], range[1]);
-      const offsetLimit = this.difficulty === "easy" ? 50 : 200;
-      const offset = MathUtils.randomInt(-offsetLimit, offsetLimit);
-      numB = numA + offset;
-
-      valA = `${numA}`;
-      valB = `${numB}`;
-    }
+    const { numA, numB, valA, valB } = IntervalsValues.getIntervalOpsValues(
+      this.difficulty,
+    );
 
     const a = numA;
     const b = numB;
