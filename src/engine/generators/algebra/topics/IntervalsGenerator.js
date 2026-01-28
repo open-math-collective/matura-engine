@@ -4,27 +4,56 @@ const MathUtils = require("../../../utils/MathUtils");
 class IntervalsGenerator extends BaseGenerator {
   generateAbsValueProblem() {
     // |x - a| < b
-    let centerRange, radiusRange;
-
-    if (this.difficulty === "easy") {
-      centerRange = [-3, 3];
-      radiusRange = [1, 4];
-    } else if (this.difficulty === "hard") {
-      centerRange = [-10, 10];
-      radiusRange = [5, 12];
-    } else {
-      centerRange = [-5, 5];
-      radiusRange = [1, 6];
-    }
-
-    const a = MathUtils.randomInt(centerRange[0], centerRange[1]);
-    const b = MathUtils.randomInt(radiusRange[0], radiusRange[1]);
+    let a, b, x1, x2, valA, valB, valX1, valX2;
     const sign = MathUtils.randomElement(["<", ">", "\\le", "\\ge"]);
-
-    const x1 = a - b;
-    const x2 = a + b;
     const isInside = sign === "<" || sign === "\\le";
     const isClosed = sign === "\\le" || sign === "\\ge";
+
+    if (this.difficulty === "hard") {
+      const [an, ad] = MathUtils.randomFraction(-10, 10, [2, 6]);
+      const [bn, bd] = MathUtils.randomFraction(1, 10, [2, 6]);
+
+      a = { n: an, d: ad };
+      b = { n: bn, d: bd };
+
+      valA = MathUtils.toLatexFraction(an, ad);
+      valB = MathUtils.toLatexFraction(bn, bd);
+
+      const subNum = an * bd - bn * ad;
+      const subDen = ad * bd;
+      const [sN, sD] = MathUtils.reduceFraction(subNum, subDen);
+
+      const addNum = an * bd + bn * ad;
+      const addDen = ad * bd;
+      const [aN, aD] = MathUtils.reduceFraction(addNum, addDen);
+
+      x1 = subNum / subDen;
+      x2 = addNum / addDen;
+
+      valX1 = MathUtils.toLatexFraction(sN, sD);
+      valX2 = MathUtils.toLatexFraction(aN, aD);
+    } else {
+      let centerRange, radiusRange;
+      if (this.difficulty === "easy") {
+        centerRange = [-300, 300];
+        radiusRange = [1, 200];
+      } else {
+        centerRange = [-1000, 1000];
+        radiusRange = [1, 500];
+      }
+
+      a = MathUtils.randomInt(centerRange[0], centerRange[1]);
+      b = MathUtils.randomInt(radiusRange[0], radiusRange[1]);
+
+      valA = `${a}`;
+      valB = `${b}`;
+
+      x1 = a - b;
+      x2 = a + b;
+
+      valX1 = `${x1}`;
+      valX2 = `${x2}`;
+    }
 
     const formatSet = (s, e, inside, closed) => {
       const bL = closed ? "\\langle" : "(";
@@ -34,46 +63,46 @@ class IntervalsGenerator extends BaseGenerator {
         : `x \\in (- \\infty, ${s} ${bR} \\cup ${bL} ${e}, \\infty)`;
     };
 
-    const correctAns = formatSet(x1, x2, isInside, isClosed);
+    const correctAns = formatSet(valX1, valX2, isInside, isClosed);
 
     const candidates = [
-      formatSet(x1, x2, !isInside, isClosed),
-      formatSet(-a - b, -a + b, isInside, isClosed),
-      formatSet(-b, b, isInside, isClosed),
-      formatSet(-a - b, -a + b, !isInside, isClosed),
-      formatSet(x1, x2, isInside, !isClosed),
+      formatSet(valX1, valX2, !isInside, isClosed),
+      formatSet(valA, valB, isInside, isClosed),
     ];
 
-    let uniqueDistractors = [...new Set(candidates)].filter(
-      (d) => d !== correctAns,
+    const distractors = MathUtils.ensureUniqueDistractors(
+      correctAns,
+      candidates,
+      () => {
+        if (this.difficulty === "hard") {
+          const r1 = MathUtils.randomInt(-10, 10);
+          const r2 = r1 + MathUtils.randomInt(1, 5);
+          return formatSet(r1, r2, isInside, isClosed);
+        }
+        const f1 = MathUtils.randomInt(-20, 20);
+        const f2 = f1 + MathUtils.randomInt(1, 10);
+        return formatSet(f1, f2, isInside, isClosed);
+      },
     );
-
-    while (uniqueDistractors.length < 3) {
-      const filler = formatSet(x1 + 1, x2 + 1, isInside, isClosed);
-      if (filler !== correctAns && !uniqueDistractors.includes(filler)) {
-        uniqueDistractors.push(filler);
-      } else {
-        uniqueDistractors.push(formatSet(-100, 100, true, true));
-      }
-    }
 
     return this.createResponse({
       question:
         "Zbiór rozwiązań nierówności jest zaznaczony na osi liczbowej. Wybierz poprawny zbiór.",
       latex: null,
       image: this.generateNumberLineSVG({
-        center: a,
+        center: typeof a === "object" ? a.n / a.d : a,
         points: [x1, x2],
+        pointLabels: [valX1, valX2],
         isInside,
         isClosed,
         type: "inequality",
       }),
-      variables: { a, b, sign },
+      variables: { a: valA, b: valB, sign },
       correctAnswer: correctAns,
-      distractors: uniqueDistractors.slice(0, 3),
+      distractors: distractors,
       steps: [
-        `Środek przedziału to $$a = ${a}$$, a promień (odległość od środka) to $$b = ${b}$$.`,
-        `Szukamy liczb, których odległość od $$${a}$$ jest ${isInside ? "mniejsza" : "większa"} ${isClosed ? "lub równa" : ""} $$${b}$$.`,
+        `Środek przedziału to $$a = ${valA}$$, a promień (odległość od środka) to $$b = ${valB}$$.`,
+        `Szukamy liczb, których odległość od $$${valA}$$ jest ${isInside ? "mniejsza" : "większa"} ${isClosed ? "lub równa" : ""} $$${valB}$$.`,
         `Odpowiedź: $$${correctAns}$$`,
       ],
       questionType: "closed",
@@ -82,22 +111,38 @@ class IntervalsGenerator extends BaseGenerator {
 
   generateIntervalOpsProblem() {
     // A u B / A n B
-    let range;
-    if (this.difficulty === "easy") {
-      range = [-3, 3];
-    } else if (this.difficulty === "hard") {
-      range = [-8, 8];
+    let valA, valB, numA, numB;
+
+    if (this.difficulty === "hard") {
+      const [an, ad] = MathUtils.randomFraction(-10, 10, [2, 5]);
+      numA = an / ad;
+      valA = MathUtils.toLatexFraction(an, ad);
+
+      const offset = MathUtils.randomElement([
+        -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2,
+      ]);
+      numB = numA + offset;
+
+      const [bn, bd] = MathUtils.randomFraction(
+        Math.floor(numA) - 2,
+        Math.ceil(numA) + 2,
+        [2, 5],
+      );
+      numB = bn / bd;
+      valB = MathUtils.toLatexFraction(bn, bd);
     } else {
-      range = [-5, 5];
+      const range = this.difficulty === "easy" ? [-300, 300] : [-1000, 1000];
+      numA = MathUtils.randomInt(range[0], range[1]);
+      const offsetLimit = this.difficulty === "easy" ? 50 : 200;
+      const offset = MathUtils.randomInt(-offsetLimit, offsetLimit);
+      numB = numA + offset;
+
+      valA = `${numA}`;
+      valB = `${numB}`;
     }
 
-    const a = MathUtils.randomInt(range[0], range[1]);
-    const offset =
-      this.difficulty === "hard"
-        ? MathUtils.randomInt(-1, 3)
-        : MathUtils.randomInt(-2, 4);
-
-    const b = a + offset;
+    const a = numA;
+    const b = numB;
 
     const closedA = MathUtils.randomElement([true, false]);
     const closedB = MathUtils.randomElement([true, false]);
@@ -108,26 +153,23 @@ class IntervalsGenerator extends BaseGenerator {
     const bracketB = closedB ? "\\langle" : "(";
 
     let result = "";
-    // A = (-inf, a>
-    // B = <b, inf)
 
     if (b > a) {
-      // A ... a   b ... B
       if (op === "intersection") result = `\\emptyset`;
       else
-        result = `(- \\infty, ${a} ${bracketA} \\cup ${bracketB} ${b}, \\infty)`;
-    } else if (b === a) {
+        result = `(- \\infty, ${valA} ${bracketA} \\cup ${bracketB} ${valB}, \\infty)`;
+    } else if (Math.abs(b - a) < 0.0001) {
       if (op === "intersection") {
-        if (closedA && closedB) result = `\\{ ${a} \\}`;
+        if (closedA && closedB) result = `\\{ ${valA} \\}`;
         else result = `\\emptyset`;
       } else {
         if (!closedA && !closedB)
-          result = `(- \\infty, ${a}) \\cup (${a}, \\infty)`;
+          result = `(- \\infty, ${valA}) \\cup (${valA}, \\infty)`;
         else result = `\\mathbb{R}`;
       }
     } else {
-      // <b, a>
-      if (op === "intersection") result = `${bracketB} ${b}, ${a} ${bracketA}`;
+      if (op === "intersection")
+        result = `${bracketB} ${valB}, ${valA} ${bracketA}`;
       else result = `\\mathbb{R}`;
     }
 
@@ -138,23 +180,24 @@ class IntervalsGenerator extends BaseGenerator {
         type: "sets",
         a,
         b,
+        pointLabels: [valA, valB],
         closedA,
         closedB,
         op,
       }),
-      variables: { a, b, op },
+      variables: { a: valA, b: valB, op },
       correctAnswer: result,
       distractors: [
-        `(${a}, ${b})`,
-        `\\langle ${a}, ${b} \\rangle`,
-        `\\mathbb{R}``(- \\infty, ${b} ${bracketB}`,
+        `(${valA}, ${valB})`,
+        `\\langle ${valA}, ${valB} \\rangle`,
+        `(- \\infty, ${valB} ${bracketB}`,
       ],
       steps: [
         `Zaznaczamy przedziały na osi liczbowej.`,
         b > a
           ? `Przedziały są rozłączne.`
-          : b === a
-            ? `Przedziały stykają się w punkcie $$${a}$$.`
+          : Math.abs(b - a) < 0.0001
+            ? `Przedziały stykają się w punkcie $$${valA}$$.`
             : `Przedziały zachodzą na siebie.`,
         `Odp: $$${result}$$`,
       ],
@@ -181,17 +224,30 @@ class IntervalsGenerator extends BaseGenerator {
       }
       const fill = params.isClosed ? color : "white";
       content += `<circle cx="${p1}" cy="${midY}" r="5" fill="${fill}" stroke="${color}" stroke-width="2"/><circle cx="${p2}" cy="${midY}" r="5" fill="${fill}" stroke="${color}" stroke-width="2"/>`;
-      content += `<text x="${p1 - 5}" y="${midY + 25}" font-size="14">${params.points[0]}</text><text x="${p2 - 5}" y="${midY + 25}" font-size="14">${params.points[1]}</text>`;
+
+      const l1 = params.pointLabels ? params.pointLabels[0] : params.points[0];
+      const l2 = params.pointLabels ? params.pointLabels[1] : params.points[1];
+
+      const clean = (t) =>
+        `${t}`.replace(/\\frac{(\d+)}{(\d+)}/, "$1/$2").replace(/[{}]/g, "");
+
+      content += `<text x="${p1 - 5}" y="${midY + 25}" font-size="14">${clean(l1)}</text><text x="${p2 - 5}" y="${midY + 25}" font-size="14">${clean(l2)}</text>`;
     } else if (params.type === "sets") {
-      const { a, b, closedA, closedB } = params;
+      const { a, b, closedA, closedB, pointLabels } = params;
       const pA = toSVG(a);
       const pB = toSVG(b);
+      const lA = pointLabels ? pointLabels[0] : a;
+      const lB = pointLabels ? pointLabels[1] : b;
+
+      const clean = (t) =>
+        `${t}`.replace(/\\frac{(\d+)}{(\d+)}/, "$1/$2").replace(/[{}]/g, "");
+
       content += `<line x1="0" y1="${midY - 10}" x2="${pA}" y2="${midY - 10}" stroke="blue" stroke-width="3" />`;
       content += `<circle cx="${pA}" cy="${midY - 10}" r="4" fill="${closedA ? "blue" : "white"}" stroke="blue" stroke-width="2"/>`;
-      content += `<text x="${pA - 5}" y="${midY - 25}" font-size="12" fill="blue">${a}</text>`;
+      content += `<text x="${pA - 5}" y="${midY - 25}" font-size="12" fill="blue">${clean(lA)}</text>`;
       content += `<line x1="${pB}" y1="${midY + 10}" x2="${size}" y2="${midY + 10}" stroke="red" stroke-width="3" />`;
       content += `<circle cx="${pB}" cy="${midY + 10}" r="4" fill="${closedB ? "red" : "white"}" stroke="red" stroke-width="2"/>`;
-      content += `<text x="${pB - 5}" y="${midY + 35}" font-size="12" fill="red">${b}</text>`;
+      content += `<text x="${pB - 5}" y="${midY + 35}" font-size="12" fill="red">${clean(lB)}</text>`;
     }
     return `<svg viewBox="0 0 ${size} 100" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ddd; background:#fff"><line x1="0" y1="${midY}" x2="${size}" y2="${midY}" stroke="#333" stroke-width="1" /><line x1="${size - 10}" y1="${midY - 5}" x2="${size}" y2="${midY}" stroke="#333" stroke-width="1" /><line x1="${size - 10}" y1="${midY + 5}" x2="${size}" y2="${midY}" stroke="#333" stroke-width="1" />${content}</svg>`;
   }
