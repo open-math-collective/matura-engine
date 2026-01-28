@@ -1,28 +1,12 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
 
+const BasicOperationsValues = require("../values/BasicOperationsValues");
+
 class BasicOperationsGenerator extends BaseGenerator {
   generatePowerProblem() {
-    // difficulty
-    let bases, nRange, kRange, mRange;
-
-    if (this.difficulty === "easy") {
-      bases = MathUtils.randomInt(2, 100);
-      nRange = [-30, 40];
-      kRange = [-20, 25];
-      mRange = [-20, 25];
-    } else if (this.difficulty === "hard") {
-      bases = MathUtils.randomInt(2, 200);
-      nRange = [-500, 500];
-      kRange = [-200, 200];
-      mRange = [-500, 500];
-    } else {
-      // medium
-      bases = MathUtils.randomInt(2, 100);
-      nRange = [-100, 100];
-      kRange = [-50, 50];
-      mRange = [-100, 100];
-    }
+    const { bases, nRange, kRange, mRange } =
+      BasicOperationsValues.getPowerProblemParams(this.difficulty);
 
     const base = Number.isInteger(bases)
       ? bases
@@ -63,35 +47,8 @@ class BasicOperationsGenerator extends BaseGenerator {
   }
 
   generateRootsProblem() {
-    // difficulty
-    let roots, f1Range, f2Range, opList;
-
-    if (this.difficulty === "easy") {
-      roots = MathUtils.randomElement([
-        2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 20,
-      ]);
-      f1Range = [2, 50];
-      f2Range = [1, 40];
-      opList = ["+", "-"];
-    } else if (this.difficulty === "hard") {
-      const largeRoots = [];
-      const isPerfectSquare = (n) => Number.isInteger(Math.sqrt(n));
-      for (let i = 2; i <= 500; i++) {
-        if (!isPerfectSquare(i)) largeRoots.push(i);
-      }
-      roots = MathUtils.randomElement(largeRoots);
-      f1Range = [20, 1000];
-      f2Range = [5, 500];
-      opList = ["-", "+"];
-    } else {
-      roots = MathUtils.randomElement([
-        2, 3, 5, 7, 10, 11, 13, 14, 15, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28,
-        30, 31, 33, 34, 35, 37,
-      ]);
-      f1Range = [5, 100];
-      f2Range = [2, 80];
-      opList = ["-", "+"];
-    }
+    const { roots, f1Range, f2Range, opList } =
+      BasicOperationsValues.getRootsProblemParams(this.difficulty);
 
     const root = Number.isInteger(roots) ? roots : roots;
     const f1 = MathUtils.randomInt(f1Range[0], f1Range[1]);
@@ -135,27 +92,8 @@ class BasicOperationsGenerator extends BaseGenerator {
   }
 
   generateScientificProblem() {
-    // difficulty
-    let bBaseRange, multipliers, expRange;
-
-    if (this.difficulty === "easy") {
-      bBaseRange = [2, 100];
-      multipliers = [2, 3, 4, 5, 6, 8, 10, 0.5, 0.1, 0.2, 2.5, 1.5];
-      expRange = [2, 50];
-    } else if (this.difficulty === "hard") {
-      bBaseRange = [2, 1000];
-      const mults = [
-        1.5, 2.5, 0.5, 0.2, 0.1, 0.25, 1.2, 0.8, 0.4, 0.01, 0.001, 0.05, 5, 10,
-        100,
-      ];
-      for (let i = 2; i < 20; i++) mults.push(i);
-      multipliers = mults;
-      expRange = [-500, 500];
-    } else {
-      bBaseRange = [2, 500];
-      multipliers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 1.5, 2.5, 0.5, 1.2, 0.8, 0.4];
-      expRange = [-200, 200];
-    }
+    const { bBaseRange, multipliers, expRange } =
+      BasicOperationsValues.getScientificParams(this.difficulty);
 
     const b_base = MathUtils.randomInt(bBaseRange[0], bBaseRange[1]);
     const multiplier = MathUtils.randomElement(multipliers);
@@ -207,29 +145,9 @@ class BasicOperationsGenerator extends BaseGenerator {
   }
 
   generateExponentRootConversion() {
-    // difficulty
-    let aList, nRange, mRange;
-
-    if (this.difficulty === "easy") {
-      aList = [
-        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-        22, 23, 24, 25, 30, 40,
-      ];
-      nRange = [2, 50];
-      mRange = [1, 50];
-    } else if (this.difficulty === "hard") {
-      const largeBases = [];
-      for (let i = 2; i <= 500; i++) largeBases.push(i);
-      aList = largeBases;
-      nRange = [2, 1000];
-      mRange = [2, 2000];
-    } else {
-      const medBases = [];
-      for (let i = 2; i <= 100; i++) medBases.push(i);
-      aList = medBases;
-      nRange = [2, 100];
-      mRange = [2, 200];
-    }
+    const { aList, nRange, mRange } = BasicOperationsValues.getConversionParams(
+      this.difficulty,
+    );
 
     const a = MathUtils.randomElement(aList);
     const n = MathUtils.randomInt(nRange[0], nRange[1]);
