@@ -1,95 +1,78 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
+const CombinationsValues = require("../values/CombinationsValues");
 
 class CombinationsGenerator extends BaseGenerator {
   generateSetsProblem() {
-    // n1 * n2 * n3 (* n4)
-    let nRange, categories;
+    const { nRange, categories, types, extraItemRange } =
+      CombinationsValues.getSetsProblemParams(this.difficulty);
 
-    if (this.difficulty === "easy") {
-      nRange = [2, 4];
-      categories = 3;
-    } else if (this.difficulty === "hard") {
-      nRange = [4, 8];
-      categories = 4;
-    } else {
-      nRange = [3, 6];
-      categories = 3;
+    const type = MathUtils.randomElement(types);
+    const categoryCount = MathUtils.randomElement(categories);
+
+    const values = [];
+    for (let i = 0; i < categoryCount; i++) {
+      values.push(MathUtils.randomInt(nRange[0], nRange[1]));
     }
 
-    const type = MathUtils.randomElement(["clothes", "menu"]);
-    let q, n1, n2, n3, n4, total;
+    const total = values.reduce((acc, val) => acc * val, 1);
 
-    if (type === "clothes") {
-      n1 = MathUtils.randomInt(nRange[0], nRange[1]);
-      n2 = MathUtils.randomInt(nRange[0], nRange[1]);
-      n3 = MathUtils.randomInt(Math.max(2, nRange[0] - 1), nRange[1] - 1);
-
-      if (categories === 4) {
-        n4 = MathUtils.randomInt(2, 5);
-        q = `W szafie wisi ${n1} bluzek, leży ${n2} par spodni, stoi ${n3} par butów i jest ${n4} czapek. Ile różnych zestawów (bluzka + spodnie + buty + czapka) można utworzyć?`;
-        total = n1 * n2 * n3 * n4;
-      } else {
-        q = `W szafie wisi ${n1} bluzek, leży ${n2} par spodni i stoi ${n3} par butów. Ile różnych zestawów (bluzka + spodnie + buty) można utworzyć?`;
-        total = n1 * n2 * n3;
-      }
-    } else {
-      n1 = MathUtils.randomInt(nRange[0], nRange[1]);
-      n2 = MathUtils.randomInt(nRange[0] + 1, nRange[1] + 1);
-      n3 = MathUtils.randomInt(nRange[0], nRange[1]);
-
-      if (categories === 4) {
-        n4 = MathUtils.randomInt(3, 6);
-        q = `Restauracja oferuje ${n1} zup, ${n2} drugich dań, ${n3} deserów i ${n4} napojów. Ile różnych pełnych zestawów obiadowych można zamówić?`;
-        total = n1 * n2 * n3 * n4;
-      } else {
-        q = `Restauracja oferuje ${n1} zup, ${n2} drugich dań i ${n3} deserów. Ile różnych pełnych zestawów obiadowych można zamówić?`;
-        total = n1 * n2 * n3;
-      }
+    const templateVars = {};
+    for (let i = 0; i < categoryCount; i++) {
+      templateVars[`n${i + 1}`] = values[i];
     }
+
+    const template = CombinationsValues.getSetsProblemTemplates(
+      type,
+      categoryCount,
+    );
+    const q = template.replace(/\{n(\d+)\}/g, (match, num) => {
+      return templateVars[`n${num}`] || match;
+    });
+
+    const sum = values.reduce((acc, val) => acc + val, 0);
+    const distractors = [
+      `${sum}`,
+      `${total * 2}`,
+      `${values[0] * values[1] + (values[2] || 0)}`,
+    ];
+
+    const multiplicationSteps = values.join(" \\cdot ");
+    const steps = [
+      `Reguła mnożenia: mnożymy liczby możliwości z każdej kategorii.`,
+      `$$${multiplicationSteps} = ${total}$$`,
+    ];
 
     return this.createResponse({
       question: q,
       latex: ``,
       image: null,
-      variables: { n1, n2, n3, n4 },
+      variables: templateVars,
       correctAnswer: `${total}`,
-      distractors: [
-        categories === 4 ? `${n1 + n2 + n3 + n4}` : `${n1 + n2 + n3}`,
-        `${total * 2}`,
-        categories === 4 ? `${n1 * n2 + n3 * n4}` : `${n1 * n2 + n3}`,
-      ],
-      steps: [
-        `Reguła mnożenia: mnożymy liczby możliwości z każdej kategorii.`,
-        categories === 4
-          ? `$$${n1} \\cdot ${n2} \\cdot ${n3} \\cdot ${n4} = ${total}$$`
-          : `$$${n1} \\cdot ${n2} \\cdot ${n3} = ${total}$$`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${total}`,
+        distractors,
+        () => {
+          const offset = MathUtils.randomElement([-1, 1, -2, 2]);
+          return `${total + offset}`;
+        },
+      ),
+      steps: steps,
       questionType: "open",
       answerFormat: "number",
     });
   }
 
   generateHandshakesProblem() {
-    // C(n, 2) = n(n-1)/2
-    let nRange;
-
-    if (this.difficulty === "easy") {
-      nRange = [4, 8];
-    } else if (this.difficulty === "hard") {
-      nRange = [15, 30];
-    } else {
-      nRange = [6, 12];
-    }
+    const { nRange, types } = CombinationsValues.getHandshakesProblemParams(
+      this.difficulty,
+    );
 
     const n = MathUtils.randomInt(nRange[0], nRange[1]);
     const result = (n * (n - 1)) / 2;
-    const type = MathUtils.randomElement(["handshakes", "matches"]);
+    const type = MathUtils.randomElement(types);
 
-    const q =
-      type === "handshakes"
-        ? `Na spotkaniu było $$${n}$$ osób. Każdy przywitał się z każdym uściskiem dłoni. Ile nastąpiło powitań?`
-        : `W turnieju bierze udział $$${n}$$ zawodników (każdy gra z każdym dokładnie jeden mecz). Ile meczów zostanie rozegranych?`;
+    const q = CombinationsValues.getHandshakesTemplates(type, n);
 
     return this.createResponse({
       question: q,
@@ -97,7 +80,14 @@ class CombinationsGenerator extends BaseGenerator {
       image: null,
       variables: { n },
       correctAnswer: `${result}`,
-      distractors: [`${n * (n - 1)}`, `${n * 2}`, `${result + n}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${result}`,
+        [`${n * (n - 1)}`, `${n * 2}`, `${result + n}`],
+        () => {
+          const offset = MathUtils.randomElement([-1, 1, -2, 2, n]);
+          return `${result + offset}`;
+        },
+      ),
       steps: [
         `Wzór na liczbę kombinacji 2-elementowych ze zbioru n-elementowego: $$\\frac{n(n-1)}{2}$$`,
         `$$\\frac{${n}\\cdot${n - 1}}{2} = \\frac{${n * (n - 1)}}{2} = ${result}$$`,
@@ -108,20 +98,11 @@ class CombinationsGenerator extends BaseGenerator {
   }
 
   generateTeamSelection() {
-    // C(n, k)
-    let nRange, k;
+    const { nRange, kValues, groupDescriptions } =
+      CombinationsValues.getTeamSelectionParams(this.difficulty);
 
-    if (this.difficulty === "easy") {
-      nRange = [5, 10];
-      k = 2;
-    } else if (this.difficulty === "hard") {
-      nRange = [20, 35];
-      k = 3;
-    } else {
-      nRange = [15, 25];
-      k = 3;
-    }
-
+    const kIndex = MathUtils.randomInt(0, kValues.length - 1);
+    const k = kValues[kIndex];
     const total = MathUtils.randomInt(nRange[0], nRange[1]);
 
     let res;
@@ -130,28 +111,54 @@ class CombinationsGenerator extends BaseGenerator {
     if (k === 2) {
       res = (total * (total - 1)) / 2;
       stepsCalc = `\\frac{${total} \\cdot ${total - 1}}{2} = ${res}`;
-    } else {
+    } else if (k === 3) {
       res = (total * (total - 1) * (total - 2)) / 6;
       stepsCalc = `\\frac{${total} \\cdot ${total - 1} \\cdot ${total - 2}}{3 \\cdot 2 \\cdot 1} = \\frac{${total * (total - 1) * (total - 2)}}{6} = ${res}`;
+    } else if (k === 4) {
+      res = (total * (total - 1) * (total - 2) * (total - 3)) / 24;
+      stepsCalc = `\\frac{${total} \\cdot ${total - 1} \\cdot ${total - 2} \\cdot ${total - 3}}{4 \\cdot 3 \\cdot 2 \\cdot 1} = ${res}`;
+    } else if (k === 5) {
+      res =
+        (total * (total - 1) * (total - 2) * (total - 3) * (total - 4)) / 120;
+      stepsCalc = `\\frac{${total} \\cdot ${total - 1} \\cdot ... \\cdot ${total - 4}}{5!} = ${res}`;
+    } else if (k === 6) {
+      res =
+        (total *
+          (total - 1) *
+          (total - 2) *
+          (total - 3) *
+          (total - 4) *
+          (total - 5)) /
+        720;
+      stepsCalc = `\\frac{${total} \\cdot ${total - 1} \\cdot ... \\cdot ${total - 5}}{6!} = ${res}`;
     }
 
-    const groupName = k === 2 ? "dwuosobową" : "trzyosobową";
+    const q = CombinationsValues.getTeamSelectionTemplates(k, total);
 
     return this.createResponse({
-      question: `Z grupy liczącej $$${total}$$ osób wybieramy ${groupName} delegację. Na ile sposobów można to zrobić?`,
+      question: q,
       latex: null,
       image: null,
       variables: { total, k },
       correctAnswer: `${res}`,
-      distractors: [
-        k === 2
-          ? `${total * (total - 1)}`
-          : `${total * (total - 1) * (total - 2)}`,
-        `${total * k}`,
-        `${res + total}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${res}`,
+        [
+          k === 2
+            ? `${total * (total - 1)}`
+            : k === 3
+              ? `${total * (total - 1) * (total - 2)}`
+              : `${total * k * 10}`,
+          `${total * k}`,
+          `${res + total}`,
+        ],
+        () => {
+          const offset = MathUtils.randomElement([-1, 1, -k, k, total]);
+          return `${Math.abs(res + offset)}`;
+        },
+      ),
       steps: [
-        `Kolejność wyboru nie ma znaczenia, stosujemy symbol Newtona (kombinacje) $${total} \\choose ${k}$.`,
+        `Kolejność wyboru nie ma znaczenia, stosujemy symbol Newtona (kombinacje) $${total} \\choose ${k}$$`,
         `$$${stepsCalc}$$`,
       ],
       questionType: "open",
