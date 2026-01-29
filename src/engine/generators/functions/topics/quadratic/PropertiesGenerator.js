@@ -1,42 +1,42 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
-const SVGUtils = require("../../../../utils/SVGUtils");
+const PropertiesValues = require("../../values/PropertiesValues");
 
 class PropertiesGenerator extends BaseGenerator {
   generateValueRangeProblem() {
-    let aList, vertexRange;
+    const params = PropertiesValues.getValueRangeParams(this.difficulty);
 
-    if (this.difficulty === "easy") {
-      aList = [-1, 1];
-      vertexRange = [-3, 3];
-    } else if (this.difficulty === "hard") {
-      aList = [-3, -2, 2, 3, 4];
-      vertexRange = [-8, 8];
-    } else {
-      aList = [-2, -1, 1, 2];
-      vertexRange = [-5, 5];
-    }
-
-    const p = MathUtils.randomInt(vertexRange[0], vertexRange[1]);
-    const q = MathUtils.randomInt(vertexRange[0], vertexRange[1]);
-    const a = MathUtils.randomElement(aList);
+    const p = MathUtils.randomInt(params.vertexRange[0], params.vertexRange[1]);
+    const q = MathUtils.randomInt(params.vertexRange[0], params.vertexRange[1]);
+    const a = MathUtils.randomElement(params.aList);
     const b = -2 * a * p;
     const c = a * p * p + q;
 
     const range =
       a > 0 ? `\\langle ${q}, \\infty )` : `( -\\infty, ${q} \\rangle`;
 
+    const formula = MathUtils.formatPolynomial(a, b, c);
+    const templates = PropertiesValues.getValueRangeTemplates(formula);
+    const question = MathUtils.randomElement(templates)();
+
+    const distractors = PropertiesValues.generateValueRangeDistractors(a, q, p);
+    const uniqueDistractors = [];
+    const used = new Set([range]);
+    for (const d of distractors) {
+      if (!used.has(d)) {
+        uniqueDistractors.push(d);
+        used.add(d);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
     return this.createResponse({
-      question: "Wyznacz zbiór wartości funkcji:",
-      latex: `f(x) = ${MathUtils.formatPolynomial(a, b, c)}`,
+      question: question,
+      latex: `f(x) = ${formula}`,
       image: null,
       variables: { a, b, c, p, q },
       correctAnswer: range,
-      distractors: [
-        a > 0 ? `( -\\infty, ${q} \\rangle` : `\\langle ${q}, \\infty )`, // reversed range
-        `\\langle ${p}, \\infty )`, // misstake q with p
-        `\\mathbb{R}`,
-      ],
+      distractors: uniqueDistractors,
       steps: [
         `Współczynnik $$a=${a}$$, ramiona skierowane w ${a > 0 ? "górę" : "dół"}.`,
         `Współrzędna $$q=${q}$$ wierzchołka.`,
@@ -48,23 +48,11 @@ class PropertiesGenerator extends BaseGenerator {
   }
 
   generateMonotonicityProblem() {
-    // (-inf, p> & <p, inf)
-    let aList, pRange;
+    const params = PropertiesValues.getMonotonicityParams(this.difficulty);
 
-    if (this.difficulty === "easy") {
-      aList = [-1, 1];
-      pRange = [-3, 3];
-    } else if (this.difficulty === "hard") {
-      aList = [-3, 3];
-      pRange = [-10, 10];
-    } else {
-      aList = [-2, 2];
-      pRange = [-5, 5];
-    }
-
-    const p = MathUtils.randomInt(pRange[0], pRange[1]);
-    const q = MathUtils.randomInt(pRange[0], pRange[1]);
-    const a = MathUtils.randomElement(aList);
+    const p = MathUtils.randomInt(params.pRange[0], params.pRange[1]);
+    const q = MathUtils.randomInt(params.pRange[0], params.pRange[1]);
+    const a = MathUtils.randomElement(params.aList);
     const b = -2 * a * p;
     const c = a * p * p + q;
 
@@ -80,19 +68,32 @@ class PropertiesGenerator extends BaseGenerator {
       interval = `( -\\infty, ${p} \\rangle`;
     }
 
+    const formula = MathUtils.formatPolynomial(a, b, c);
+    const templates = PropertiesValues.getMonotonicityTemplates(formula, type);
+    const question = MathUtils.randomElement(templates)();
+
+    const distractors = PropertiesValues.generateMonotonicityDistractors(
+      interval,
+      p,
+      q,
+    );
+    const uniqueDistractors = [];
+    const used = new Set([interval]);
+    for (const d of distractors) {
+      if (!used.has(d)) {
+        uniqueDistractors.push(d);
+        used.add(d);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
     return this.createResponse({
-      question: `Funkcja kwadratowa $$f(x) = ${MathUtils.formatPolynomial(a, b, c)}$$ jest ${type} w przedziale:`,
+      question: question,
       latex: null,
       image: null,
       variables: { a, p, type },
       correctAnswer: interval,
-      distractors: [
-        interval.includes("infty") && interval.includes("-")
-          ? interval.replace("-", "")
-          : `( -\\infty, ${p} \\rangle`, // reversed interval
-        `\\langle ${q}, \\infty )`, // misstake p with q
-        `( -\\infty, ${q} \\rangle`,
-      ],
+      distractors: uniqueDistractors,
       steps: [
         `Współrzędna $$p$$ wierzchołka $$p = \\frac{-b}{2a} = ${p}$$.`,
         `Ramiona ${a > 0 ? "góra" : "dół"}.`,
@@ -102,8 +103,13 @@ class PropertiesGenerator extends BaseGenerator {
   }
 
   generateMinMaxIntervalProblem() {
-    // f(x) in <start, end>
-    const { a, b, c, p, q } = this.generateCoefficients();
+    const params = PropertiesValues.getMinMaxIntervalParams(this.difficulty);
+
+    const p = MathUtils.randomInt(params.pRange[0], params.pRange[1]);
+    const q = MathUtils.randomInt(params.pRange[0], params.pRange[1]);
+    const a = MathUtils.randomElement(params.aList);
+    const b = -2 * a * p;
+    const c = a * p * p + q;
 
     let isPInside;
     if (this.difficulty === "easy") isPInside = true;
@@ -133,15 +139,33 @@ class PropertiesGenerator extends BaseGenerator {
     if (start <= p && p <= end) values.push(f_p);
 
     const ans =
-      type === "najmniejszą" ? Math.min(...values) : Math.max(...values);
+      type === "najmniejsza" ? Math.min(...values) : Math.max(...values);
+
+    const formula = MathUtils.formatPolynomial(a, b, c);
+    const templates = PropertiesValues.getMinMaxIntervalTemplates(
+      formula,
+      start,
+      end,
+      type,
+    );
+    const question = MathUtils.randomElement(templates)();
+
+    const correctAnswer = `${ans}`;
+    const distractors = PropertiesValues.generateMinMaxIntervalDistractors(
+      ans,
+      f_start,
+      f_end,
+      q,
+      correctAnswer,
+    );
 
     return this.createResponse({
-      question: `Największą i najmniejszą wartość funkcji w przedziale $$\\langle ${start}, ${end} \\rangle$$ są odpowiednio liczby... Jaka jest ${type} z nich?`,
-      latex: `f(x) = ${MathUtils.formatPolynomial(a, b, c)}`,
+      question: question,
+      latex: `f(x) = ${formula}`,
       image: null,
       variables: { ans },
-      correctAnswer: `${ans}`,
-      distractors: [`${f_start}`, `${f_end}`, `${q}`],
+      correctAnswer: correctAnswer,
+      distractors: distractors,
       steps: [
         `Wierzchołek $$p=${p}$$ ${start <= p && p <= end ? "należy" : "nie należy"} do przedziału.`,
         `Obliczamy wartości na krańcach: $$f(${start})=${f_start}, f(${end})=${f_end}$$` +
@@ -156,21 +180,11 @@ class PropertiesGenerator extends BaseGenerator {
   }
 
   generateCoefficients() {
-    let pRange, aList;
-    if (this.difficulty === "easy") {
-      pRange = [-3, 3];
-      aList = [-1, 1];
-    } else if (this.difficulty === "hard") {
-      pRange = [-6, 6];
-      aList = [-2, 2, 3];
-    } else {
-      pRange = [-4, 4];
-      aList = [-1, 1, 2];
-    }
+    const params = PropertiesValues.getCoefficientsParams(this.difficulty);
 
-    const p = MathUtils.randomInt(pRange[0], pRange[1]);
-    const q = MathUtils.randomInt(pRange[0], pRange[1]);
-    const a = MathUtils.randomElement(aList);
+    const p = MathUtils.randomInt(params.pRange[0], params.pRange[1]);
+    const q = MathUtils.randomInt(params.pRange[0], params.pRange[1]);
+    const a = MathUtils.randomElement(params.aList);
     const b = -2 * a * p;
     const c = a * (p * p) + q;
     return { a, b, c, p, q };
