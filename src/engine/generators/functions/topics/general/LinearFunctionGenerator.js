@@ -1,45 +1,42 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
+const LinearFunctionValues = require("../../values/LinearFunctionValues");
 
 class LinearFunctionGenerator extends BaseGenerator {
   generateLinearRoot() {
-    // f(x) = ax + b = 0 -> x = -b/a
+    const { a, b, root } = LinearFunctionValues.generateLinearRootScenario(
+      this.difficulty,
+    );
 
-    let a_num, a_den, rootRange;
+    const formula = LinearFunctionValues.formatLinear(a, b);
+    const aLatex = LinearFunctionValues.fractionToLatex(a);
+    const bLatex = LinearFunctionValues.fractionToLatex(-b);
+    const negBLatex = LinearFunctionValues.fractionToLatex(-b);
 
-    if (this.difficulty === "easy") {
-      a_num = MathUtils.randomElement([1, 2, 3, 4]);
-      a_den = 1;
-      rootRange = [-5, 5];
-    } else if (this.difficulty === "hard") {
-      a_num = MathUtils.randomElement([2, 3, 4, 5]);
-      a_den = MathUtils.randomElement([3, 5, 7]);
-      rootRange = [-8, 8];
-    } else {
-      a_num = MathUtils.randomElement([1, 2, 3]);
-      a_den = MathUtils.randomElement([1, 2]);
-      rootRange = [-6, 6];
-    }
-
-    const root = MathUtils.randomInt(rootRange[0], rootRange[1]);
-    if (Math.random() > 0.5) a_num *= -1;
-
-    const a = a_num / a_den;
-    const b = -a * root;
-    const formula = this.formatLinear(a, b);
+    const q = LinearFunctionValues.getLinearRootTemplates();
 
     return this.createResponse({
-      question: `Wyznacz miejsce zerowe funkcji liniowej określonej wzorem:`,
+      question: q,
       latex: `f(x) = ${formula}`,
       image: null,
       variables: { a, b, root },
       correctAnswer: `${root}`,
-      distractors: [`${-root}`, `${b}`, `${root + 1}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${root}`,
+        [
+          `${-root}`,
+          `${Math.floor(b)}`,
+          `${root + 1}`,
+          `${root - 1}`,
+          `${root * 2}`,
+        ],
+        () => `${root + MathUtils.randomInt(-5, 5)}`,
+      ),
       steps: [
         `Szukamy takiego $$x$$, dla którego $$f(x) = 0$$.`,
         `$$${formula} = 0$$`,
-        `$$${this.fractionToLatex(a)}x = ${this.fractionToLatex(-b)}$$`,
-        `$$x = ${this.fractionToLatex(-b)} : (${this.fractionToLatex(a)}) = ${root}$$`,
+        `$$${aLatex}x = ${bLatex}$$`,
+        `$$x = ${negBLatex} : (${aLatex}) = ${root}$$`,
       ],
       questionType: "open",
       answerFormat: "number",
@@ -47,24 +44,28 @@ class LinearFunctionGenerator extends BaseGenerator {
   }
 
   generateLinearGraphAnalysis() {
-    let a = MathUtils.randomElement([-2, -1, 1, 2]);
-    if (this.difficulty === "hard") a = MathUtils.randomElement([-0.5, 0.5]);
-
-    const b = MathUtils.randomElement([-3, -2, 2, 3]);
+    const params = LinearFunctionValues.getGraphAnalysisParams(this.difficulty);
+    const a = MathUtils.randomElement(params.aValues);
+    const b = MathUtils.randomElement(params.bValues);
 
     const aSign = a > 0 ? ">" : "<";
     const bSign = b > 0 ? ">" : "<";
     const correct = `a ${aSign} 0 \\quad \\text{i} \\quad b ${bSign} 0`;
 
     const wrong1 = `a ${aSign === ">" ? "<" : ">"} 0 \\quad \\text{i} \\quad b ${bSign} 0`;
-
     const wrong2 = `a ${aSign} 0 \\quad \\text{i} \\quad b ${bSign === ">" ? "<" : ">"} 0`;
-
     const wrong3 = `a ${aSign === ">" ? "<" : ">"} 0 \\quad \\text{i} \\quad b ${bSign === ">" ? "<" : ">"} 0`;
 
+    const templates = [
+      "Na rysunku przedstawiono wykres funkcji liniowej $$f(x) = ax + b$$. Prawdziwe jest zdanie:",
+      "Wykres funkcji liniowej $$f(x) = ax + b$$ pokazano na rysunku. Które zdanie jest prawdziwe?",
+      "Dla funkcji liniowej $$f(x) = ax + b$$ o wykresie przedstawionym na rysunku, prawdziwe jest:",
+      "Na podstawie wykresu funkcji $$f(x) = ax + b$$ wskaż prawdziwe zdanie:",
+      "Wykres $$f(x) = ax + b$$ przedstawiono graficznie. Prawdziwe jest zdanie:",
+    ];
+
     return this.createResponse({
-      question:
-        "Na rysunku przedstawiono wykres funkcji liniowej $$f(x) = ax + b$$. Prawdziwe jest zdanie:",
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: this.generateSVG({ type: "linear_full", a, b }),
       variables: { a, b },
@@ -79,21 +80,18 @@ class LinearFunctionGenerator extends BaseGenerator {
   }
 
   generateLinearMonotonicityParam() {
-    // f(x) = (Am + B)x + C
+    const params = LinearFunctionValues.getMonotonicityParams(this.difficulty);
 
-    let coeffM, constRange;
-    if (this.difficulty === "easy") {
-      coeffM = MathUtils.randomElement([2, 3]);
-      constRange = [-6, 6];
-    } else if (this.difficulty === "hard") {
-      coeffM = MathUtils.randomElement([-2, -3, -4]);
-      constRange = [-12, 12];
+    let coeffM;
+    if (Array.isArray(params.coeffMRange)) {
+      coeffM = MathUtils.randomElement(params.coeffMRange);
     } else {
-      coeffM = MathUtils.randomElement([-2, 2]);
-      constRange = [-8, 8];
+      coeffM = MathUtils.randomInt(
+        params.coeffMRange[0],
+        params.coeffMRange[1],
+      );
     }
 
-    const constVal = MathUtils.randomInt(constRange[0], constRange[1]);
     const validConst =
       MathUtils.randomInt(1, 4) *
       Math.abs(coeffM) *
@@ -103,26 +101,47 @@ class LinearFunctionGenerator extends BaseGenerator {
     const type = MathUtils.randomElement(["rosnąca", "malejąca"]);
     const boundary = -validConst / coeffM;
 
-    let finalSign;
-    // type=rosnaca -> (coeff)m > -const
-    // type=malejaca -> (coeff)m < -const
-    // if coeff < 0, reverse sign
+    let boundaryStr;
+    if (Number.isInteger(boundary)) {
+      boundaryStr = `${boundary}`;
+    } else {
+      boundaryStr = LinearFunctionValues.fractionToLatex(boundary);
+    }
 
+    let finalSign;
     if (type === "rosnąca") {
       finalSign = coeffM > 0 ? ">" : "<";
     } else {
       finalSign = coeffM > 0 ? "<" : ">";
     }
 
+    const templates = [
+      `Dla jakiego parametru $$m$$ funkcja liniowa $$f(x) = (${bracket})x + 5$$ jest ${type}?`,
+      `Funkcja $$f(x) = (${bracket})x + 5$$ jest ${type} dla jakiego $$m$$?`,
+      `Wyznacz $$m$$ tak, aby funkcja $$f(x) = (${bracket})x + 5$$ była ${type}.`,
+      `Dla jakich wartości $$m$$ funkcja $$f(x) = (${bracket})x + 5$$ jest funkcją ${type}?`,
+      `Znajdź warunek na $$m$$, przy którym $$f(x) = (${bracket})x + 5$$ jest ${type}.`,
+      `Podaj warunek na $$m$$ dla funkcji $$f(x) = (${bracket})x + 5$$ aby była ${type}.`,
+      `Dla jakich $$m$$ funkcja liniowa $$f(x) = (${bracket})x + 5$$ jest ${type}?`,
+      `Znajdź zbiór wartości $$m$$, dla których $$f(x) = (${bracket})x + 5$$ jest ${type}.`,
+      `Wyznacz zbiór $$m$$ tak, aby $$f(x) = (${bracket})x + 5$$ była funkcją ${type}.`,
+      `Funkcja liniowa $$f(x) = (${bracket})x + 5$$ ma być ${type}. Dla jakich $$m$$?`,
+      `Podaj zbiór wszystkich $$m$$, dla których $$f(x) = (${bracket})x + 5$$ jest ${type}.`,
+      `Dla jakiego $$m$$ współczynnik kierunkowy $$f(x) = (${bracket})x + 5$$ zapewnia, że funkcja jest ${type}?`,
+      `Wskaż warunek na parametr $$m$$ w funkcji $$f(x) = (${bracket})x + 5$$ aby była ${type}.`,
+      `Oblicz, dla jakich $$m$$ funkcja $$f(x) = (${bracket})x + 5$$ spełnia warunek bycia funkcją ${type}.`,
+      `Zbadaj, dla jakich wartości $$m$$ funkcja $$f(x) = (${bracket})x + 5$$ jest ${type}.`,
+    ];
+
     return this.createResponse({
-      question: `Dla jakiego parametru $$m$$ funkcja liniowa $$f(x) = (${bracket})x + 5$$ jest ${type}?`,
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: null,
       variables: { coeffM, validConst, type, boundary },
-      correctAnswer: `$$m ${finalSign} ${boundary}$$`,
+      correctAnswer: `$$m ${finalSign} ${boundaryStr}$$`,
       distractors: [
-        `$$m ${finalSign === ">" ? "<" : ">"} ${boundary}$$`,
-        `$$m = ${boundary}$$`,
+        `$$m ${finalSign === ">" ? "<" : ">"} ${boundaryStr}$$`,
+        `$$m = ${boundaryStr}$$`,
         `$$m ${finalSign} ${-boundary}$$`,
       ],
       steps: [
@@ -130,7 +149,7 @@ class LinearFunctionGenerator extends BaseGenerator {
         `$$${bracket} ${type === "rosnąca" ? ">" : "<"} 0$$`,
         `$$${coeffM}m ${type === "rosnąca" ? ">" : "<"} ${-validConst}$$`,
         `Dzielimy przez $$${coeffM}$$ ${coeffM < 0 ? "(pamiętając o zmianie znaku!)" : ""}:`,
-        `$$m ${finalSign} ${boundary}$$`,
+        `$$m ${finalSign} ${boundaryStr}$$`,
       ],
       questionType: "open",
       answerFormat: "m=x",
@@ -138,22 +157,33 @@ class LinearFunctionGenerator extends BaseGenerator {
   }
 
   generateLinearProperties() {
-    const a = MathUtils.randomInt(-5, 5) || 1;
-    const b = MathUtils.randomInt(-5, 5);
+    const params = LinearFunctionValues.getLinearPropertiesParams(
+      this.difficulty,
+    );
+    const a = MathUtils.randomInt(params.aRange[0], params.aRange[1]) || 1;
+    const b = MathUtils.randomInt(params.bRange[0], params.bRange[1]);
+
     const formula = `f(x) = ${a === 1 ? "" : a === -1 ? "-" : a}x ${b >= 0 ? "+" : ""}${b}`;
     const monotonicity = a > 0 ? "rosnąca" : a < 0 ? "malejąca" : "stała";
     const intercept = `(0, ${b})`;
 
+    const q = LinearFunctionValues.getLinearPropertiesTemplates(formula);
+
+    const wrongIntercept1 =
+      b === 0 ? `(0, ${MathUtils.randomInt(1, 5)})` : `(0, ${-b})`;
+    const wrongIntercept2 =
+      b === 0 ? `(${MathUtils.randomInt(1, 5)}, 0)` : `(${b}, 0)`;
+
     return this.createResponse({
-      question: `Dana jest funkcja liniowa określona wzorem $$${formula}$$. Funkcja ta jest:`,
+      question: q,
       latex: ``,
       image: this.generateSVG({ type: "linear", a, b }),
       variables: { a, b },
       correctAnswer: `${monotonicity} i jej wykres przecina oś $$Oy$$ w punkcie $$${intercept}$$`,
       distractors: [
-        `${monotonicity} i jej wykres przecina oś $$Oy$$ w punkcie $$(0, ${-b})$$`,
+        `${monotonicity} i jej wykres przecina oś $$Oy$$ w punkcie $${wrongIntercept1}$$`,
         `${a > 0 ? "malejąca" : "rosnąca"} i jej wykres przecina oś $$Oy$$ w punkcie $$${intercept}$$`,
-        `${a > 0 ? "malejąca" : "rosnąca"} i jej wykres przecina oś $$Oy$$ w punkcie $$(${b}, 0)$$`,
+        `${a > 0 ? "malejąca" : "rosnąca"} i jej wykres przecina oś $$Oy$$ w punkcie $${wrongIntercept2}$$`,
       ],
       steps: [
         `Współczynnik kierunkowy $$a = ${a}$$ (${monotonicity}).`,
@@ -161,25 +191,6 @@ class LinearFunctionGenerator extends BaseGenerator {
       ],
       questionType: "closed",
     });
-  }
-
-  formatLinear(a, b) {
-    const aStr = this.fractionToLatex(a);
-    const xPart = aStr === "1" ? "x" : aStr === "-1" ? "-x" : `${aStr}x`;
-    const bS =
-      b === 0
-        ? ""
-        : b > 0
-          ? `+${this.fractionToLatex(b)}`
-          : this.fractionToLatex(b);
-    return `${xPart}${bS}`;
-  }
-
-  fractionToLatex(val) {
-    if (Number.isInteger(val)) return `${val}`;
-    if (Math.abs(val - 0.5) < 0.001) return "\\frac{1}{2}";
-    if (Math.abs(val + 0.5) < 0.001) return "-\\frac{1}{2}";
-    return parseFloat(val.toFixed(2));
   }
 
   generateSVG(params) {
