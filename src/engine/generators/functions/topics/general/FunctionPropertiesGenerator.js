@@ -1,62 +1,28 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
+const FunctionPropertiesValues = require("../../values/FunctionPropertiesValues");
 
 class FunctionPropertiesGenerator extends BaseGenerator {
   generatePointBelongsParam() {
-    let type, coeffRange, pointRange;
+    const { x0, m, formulaLatex, stepsCalc } =
+      FunctionPropertiesValues.generatePointBelongsScenario(this.difficulty);
 
-    if (this.difficulty === "easy") {
-      type = "quadratic";
-      coeffRange = [-2, 2];
-      pointRange = [-3, 3];
-    } else if (this.difficulty === "hard") {
-      type = MathUtils.randomElement(["rational", "quadratic"]);
-      coeffRange = [-8, 8];
-      pointRange = [-8, 8];
-    } else {
-      type = "rational";
-      coeffRange = [-5, 5];
-      pointRange = [-5, 5];
-    }
-
-    let formula, x0, m, stepsCalc;
-
-    if (type === "rational") {
-      let a = MathUtils.randomInt(coeffRange[0], coeffRange[1]);
-      if (a === 0) a = 2;
-
-      const b = MathUtils.randomInt(coeffRange[0], coeffRange[1]);
-
-      const divisors = [];
-      for (let i = 1; i <= Math.abs(a); i++) {
-        if (a % i === 0) {
-          divisors.push(i);
-          divisors.push(-i);
-        }
-      }
-      x0 = MathUtils.randomElement(divisors);
-      m = a / x0 + b;
-
-      formula = `f(x) = \\frac{${a}}{x} ${b >= 0 ? "+" : ""}${b === 0 ? "" : b}`;
-      stepsCalc = `$$f(${x0}) = \\frac{${a}}{${x0}} ${b >= 0 ? "+" : ""}${b === 0 ? "" : b} = ${a / x0} ${b >= 0 ? "+" : ""}${b === 0 ? "" : b} = ${m}$$`;
-    } else {
-      // f(x) = (x-p)^2 + q
-      const p = MathUtils.randomInt(coeffRange[0], coeffRange[1]);
-      const q = MathUtils.randomInt(coeffRange[0], coeffRange[1]);
-      x0 = MathUtils.randomInt(pointRange[0], pointRange[1]);
-      m = Math.pow(x0 - p, 2) + q;
-
-      formula = `f(x) = (x ${p > 0 ? "-" : "+"} ${Math.abs(p)})^2 ${q >= 0 ? "+" : ""}${q}`;
-      stepsCalc = `$$f(${x0}) = (${x0} ${p > 0 ? "-" : "+"} ${Math.abs(p)})^2 ${q >= 0 ? "+" : ""}${q} = (${x0 - p})^2 ${q >= 0 ? "+" : ""}${q} = ${Math.pow(x0 - p, 2)} ${q >= 0 ? "+" : ""}${q} = ${m}$$`;
-    }
+    const q = FunctionPropertiesValues.getPointBelongsTemplates(x0).replace(
+      "[FORMULA]",
+      formulaLatex,
+    );
 
     return this.createResponse({
-      question: `Punkt $$A = (${x0}, m)$$ należy do wykresu funkcji $$${formula}$$. Zatem:`,
+      question: q,
       latex: null,
       image: null,
       variables: { x0, m },
       correctAnswer: `m = ${m}`,
-      distractors: [`m = ${m + 1}`, `m = ${-m}`, `m = 0`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `m = ${m}`,
+        [`m = ${m + 1}`, `m = ${-m}`, `m = 0`, `m = ${m - 1}`, `m = ${m * 2}`],
+        () => `m = ${m + MathUtils.randomInt(-5, 5)}`,
+      ),
       steps: [
         `Skoro punkt $$A$$ należy do wykresu, to jego współrzędne spełniają równanie funkcji.`,
         `Podstawiamy $$x = ${x0}$$ i $$y = m$$.`,
@@ -68,17 +34,13 @@ class FunctionPropertiesGenerator extends BaseGenerator {
   }
 
   generateReadGraphProperties() {
-    let segmentsCount, rangeXY;
-    if (this.difficulty === "easy") {
-      segmentsCount = 2;
-      rangeXY = [-4, 4];
-    } else if (this.difficulty === "hard") {
-      segmentsCount = 5;
-      rangeXY = [-8, 8];
-    } else {
-      segmentsCount = 3;
-      rangeXY = [-6, 6];
-    }
+    const { segmentsCountRange, rangeXY } =
+      FunctionPropertiesValues.getReadGraphParams(this.difficulty);
+
+    const segmentsCount = MathUtils.randomInt(
+      segmentsCountRange[0],
+      segmentsCountRange[1],
+    );
 
     const points = [];
     let currX = rangeXY[0];
@@ -101,18 +63,45 @@ class FunctionPropertiesGenerator extends BaseGenerator {
     const maxY = Math.max(...ys);
     const range = `\\langle ${minY}, ${maxY} \\rangle`;
 
+    const templates = [
+      "Na rysunku przedstawiono wykres funkcji $$y=f(x)$$. Zbiorem wartości tej funkcji jest:",
+      "Wykres funkcji $$y=f(x)$$ przedstawiono na rysunku. Zbiór wartości tej funkcji to:",
+      "Dla funkcji $$y=f(x)$$ o wykresie przedstawionym na rysunku, zbiorem wartości jest:",
+      "Przedstawiono wykres funkcji $$f$$. Zbiór wartości funkcji $$f$$ to:",
+      "Na podstawie wykresu funkcji $$y=f(x)$$ podaj jej zbiór wartości:",
+      "Jaki jest zbiór wartości funkcji $$y=f(x)$$ przedstawionej na rysunku?",
+      "Wskaż zbiór wartości funkcji $$f$$ na podstawie jej wykresu:",
+      "Podaj zbiór wartości funkcji $$y=f(x)$$ odczytany z wykresu:",
+      "Zbadaj zbiór wartości funkcji $$f$$ na podstawie przedstawionego wykresu:",
+      "Odczytaj zbiór wartości funkcji $$y=f(x)$$ z przedstawionego wykresu:",
+      "Na rysunku pokazano wykres funkcji $$f$$. Podaj jej zbiór wartości:",
+      "Wyznacz zbiór wartości funkcji $$y=f(x)$$ na podstawie wykresu:",
+      "Podaj zbiór wartości funkcji $$f(x)$$ przedstawionej graficznie:",
+      "Z przedstawionego wykresu funkcji $$y=f(x)$$ odczytaj jej zbiór wartości:",
+      "Odczytaj z wykresu funkcji $$f$$ jej zbiór wartości:",
+      "Dla funkcji przedstawionej na wykresie podaj zbiór wartości:",
+      "Na podstawie graficznego przedstawienia funkcji $$f$$ podaj jej zbiór wartości:",
+      "Jaki zbiór wartości odpowiada funkcji przedstawionej na wykresie?",
+      "Wskaż na podstawie wykresu zbiór wartości funkcji $$y=f(x)$$:",
+      "Podaj zbiór wszystkich wartości przyjmowanych przez funkcję $$f$$ na wykresie:",
+    ];
+
     return this.createResponse({
-      question:
-        "Na rysunku przedstawiono wykres funkcji $$y=f(x)$$. Zbiorem wartości tej funkcji jest:",
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: this.generateSVG({ type: "polyline", points }),
       variables: { points, minY, maxY },
       correctAnswer: range,
-      distractors: [
-        `\\langle ${points[0].x}, ${points[points.length - 1].x} \\rangle`,
-        `\\langle ${minY - 1}, ${maxY + 1} \\rangle`,
-        `\\langle ${minY}, ${maxY})`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        range,
+        [
+          `\\langle ${points[0].x}, ${points[points.length - 1].x} \\rangle`,
+          `\\langle ${minY - 2}, ${maxY + 2} \\rangle`,
+          `\\langle ${minY}, ${maxY})`,
+          `\\langle ${minY - 1}, ${maxY} \\rangle`,
+        ],
+        () => `\\langle ${minY + 1}, ${maxY} \\rangle`,
+      ),
       steps: [
         `Odczytujemy z osi $$Oy$$ najniższy i najwyższy punkt wykresu.`,
         `Najmniejsza wartość: $$y_{min} = ${minY}$$`,
@@ -124,19 +113,8 @@ class FunctionPropertiesGenerator extends BaseGenerator {
   }
 
   generateFunctionDomain() {
-    let range;
-    let polynomialProb;
-
-    if (this.difficulty === "easy") {
-      range = [-3, 3];
-      polynomialProb = 0.0;
-    } else if (this.difficulty === "hard") {
-      range = [-9, 9];
-      polynomialProb = 1.0;
-    } else {
-      range = [-5, 5];
-      polynomialProb = 0.5;
-    }
+    const { range, polynomialProb } =
+      FunctionPropertiesValues.getFunctionDomainParams(this.difficulty);
 
     const x1 = MathUtils.randomInt(range[0], range[1]);
     let x2 = MathUtils.randomInt(range[0], range[1]);
@@ -155,17 +133,41 @@ class FunctionPropertiesGenerator extends BaseGenerator {
       denominatorLatex = `${p1}${p2}`;
     }
 
+    const templates = [
+      `Dziedziną funkcji $$f$$ określonej wzorem $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ jest zbiór liczb rzeczywistych z wyłączeniem jakich liczb?`,
+      `Funkcja $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie jest określona dla jakich wartości $$x$$?`,
+      `Dla jakich liczb funkcja $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie jest określona?`,
+      `Wskaż wartości, które należy wykluczyć z dziedziny funkcji $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$.`,
+      `Jakie liczby należy wykluczyć z dziedziny funkcji $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$?`,
+      `Dla jakich $$x$$ funkcja $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie ma sensu?`,
+      `Wyznacz wartości wykluczone z dziedziny funkcji $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$.`,
+      `Podaj liczby, dla których funkcja $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie jest określona.`,
+      `Znajdź wartości wykluczone z dziedziny $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$.`,
+      `Oblicz, dla jakich $$x$$ funkcja $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie istnieje.`,
+      `Wskaż miejsca, w których funkcja $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie jest określona.`,
+      `Podaj wartości $$x$$, dla których $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie ma wartości.`,
+      `Dziedzina funkcji $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ nie obejmuje jakich liczb?`,
+      `Które liczby nie należą do dziedziny funkcji $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$?`,
+      `Z jakich liczb składa się zbiór wykluczony z dziedziny $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$?`,
+    ];
+
     return this.createResponse({
-      question: `Dziedziną funkcji $$f$$ określonej wzorem $$f(x) = \\frac{2x+1}{${denominatorLatex}}$$ jest zbiór liczb rzeczywistych z wyłączeniem jakich liczb?`,
+      question: MathUtils.randomElement(templates),
       latex: null,
       image: null,
       variables: { x1, x2 },
       correctAnswer: `\\{${Math.min(x1, x2)}, ${Math.max(x1, x2)}\\}`,
-      distractors: [
-        `\\{${Math.min(-x1, -x2)}, ${Math.max(-x1, -x2)}\\}`,
-        `\\{${x1}\\}`,
-        `\\mathbb{R}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `\\{${Math.min(x1, x2)}, ${Math.max(x1, x2)}\\}`,
+        [
+          `\\{${Math.min(-x1, -x2)}, ${Math.max(-x1, -x2)}\\}`,
+          `\\{${x1}\\}`,
+          `\\mathbb{R}`,
+          `\\{${x2}\\}`,
+          `\\{${Math.min(x1, x2)}\\}`,
+        ],
+        () => `\\{${x1 + 1}, ${x2 + 1}\\}`,
+      ),
       steps: [
         `Mianownik musi być różny od zera.`,
         `Miejsca zerowe mianownika: $$${x1}, ${x2}$$`,
@@ -177,37 +179,51 @@ class FunctionPropertiesGenerator extends BaseGenerator {
   }
 
   generateFunctionValue() {
-    let coeffRange, xRange;
-    if (this.difficulty === "easy") {
-      coeffRange = [-2, 2];
-      xRange = [0, 3];
-    } else if (this.difficulty === "hard") {
-      coeffRange = [-6, 6];
-      xRange = [-5, 5];
-    } else {
-      coeffRange = [-4, 4];
-      xRange = [-3, 3];
-    }
+    const { coeffRange, xRange, degree } =
+      FunctionPropertiesValues.getFunctionValueParams(this.difficulty);
 
+    const actualDegree =
+      typeof degree === "string" ? degree : MathUtils.randomElement(degree);
     const a = MathUtils.randomInt(xRange[0], xRange[1]);
-    const c1 = MathUtils.randomInt(coeffRange[0], coeffRange[1]) || 1;
-    const c2 = MathUtils.randomInt(coeffRange[0], coeffRange[1]);
-    const c3 = MathUtils.randomInt(coeffRange[0], coeffRange[1]);
+    const coeffs = FunctionPropertiesValues.generatePolynomial(
+      actualDegree,
+      coeffRange,
+    );
+    const result = FunctionPropertiesValues.calculatePolynomialValue(
+      coeffs,
+      a,
+      actualDegree,
+    );
+    const formulaLatex = FunctionPropertiesValues.formatPolynomialLatex(
+      coeffs,
+      actualDegree,
+    );
 
-    const formula = MathUtils.formatPolynomial(c1, c2, c3);
-    const result = c1 * a * a + c2 * a + c3;
+    const templates = [
+      `Dana jest funkcja $$f(x) = ${formulaLatex}$$. Wartość tej funkcji dla argumentu $$x=${a}$$ jest równa:`,
+      `Dla funkcji $$f(x) = ${formulaLatex}$$ oblicz $$f(${a})$$.`,
+      `Funkcja $$f(x) = ${formulaLatex}$$ przyjmuje jaką wartość dla $$x = ${a}$$?`,
+      `Oblicz wartość funkcji $$f(x) = ${formulaLatex}$$ dla argumentu $$x = ${a}$$.`,
+      `Podaj $$f(${a})$$ dla funkcji $$f(x) = ${formulaLatex}$$.`,
+    ];
 
     return this.createResponse({
-      question: `Dana jest funkcja $$f(x) = ${formula}$$. Wartość tej funkcji dla argumentu $$x=${a}$$ jest równa:`,
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: null,
-      variables: { a, c1, c2, c3 },
+      variables: { a, ...coeffs },
       correctAnswer: `${result}`,
-      distractors: [
-        `${result + c1 + 2 * c3}`,
-        `${result + 2 * c1 + c2}`,
-        `${result - 10}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${result}`,
+        [
+          `${result + coeffs.c1 + 2 * coeffs.c3}`,
+          `${result + 2 * coeffs.c1 + coeffs.c2}`,
+          `${result - 10}`,
+          `${result + 1}`,
+          `${result - 1}`,
+        ],
+        () => `${result + MathUtils.randomInt(-20, 20)}`,
+      ),
       steps: [
         `Podstawiamy $$x = ${a}$$ do wzoru funkcji.`,
         `$$f(${a}) = ${result}$$`,
@@ -219,7 +235,7 @@ class FunctionPropertiesGenerator extends BaseGenerator {
   generateSVG(params) {
     const size = 300;
     const center = size / 2;
-    const scale = 20; // 20px
+    const scale = 20; // px
 
     let grid = "";
     for (let i = -7; i <= 7; i++) {
