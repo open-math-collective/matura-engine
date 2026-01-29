@@ -1,39 +1,47 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
+const GeometricOptimizationValues = require("../../values/GeometricOptimizationValues");
 
 class GeometricOptimizationGenerator extends BaseGenerator {
   generateFencingProblem() {
-    let rangeL;
-    if (this.difficulty === "easy") {
-      rangeL = [2, 4];
-    } else if (this.difficulty === "hard") {
-      rangeL = [10, 20];
-    } else {
-      rangeL = [5, 9];
-    }
+    const params = GeometricOptimizationValues.getFencingParams(
+      this.difficulty,
+    );
 
-    const L = MathUtils.randomInt(rangeL[0], rangeL[1]) * 12;
+    const L = MathUtils.randomInt(params.rangeL[0], params.rangeL[1]);
     const x = L / 12;
     const y = (L - 6 * x) / 4;
     const maxArea = 3 * x * y;
 
+    const templateFn = MathUtils.randomElement(
+      GeometricOptimizationValues.getFencingTemplates(),
+    );
+
+    const distractors = GeometricOptimizationValues.generateFencingDistractors(
+      x,
+      y,
+      L,
+    );
+
     return this.createResponse({
-      question: `W schronisku należy zbudować ogrodzenie wydzielające trzy identyczne prostokątne wybiegi o wspólnych ścianach wewnętrznych (przylegające do siebie dłuższym bokiem całego terenu). Do wykonania ogrodzenia zakupiono $$${L}$$ metrów siatki. Oblicz wymiary jednego małego wybiegu ($$x$$ i $$y$$), dla których suma pól tych wybiegów będzie największa.`,
+      question: templateFn(L, x, y),
       latex: null,
-      image: null,
+      image: GeometricOptimizationValues.generateFencingSVG(),
       variables: { L, x, y, maxArea },
       correctAnswer: `x=${x}, y=${y}`,
-      distractors: [
-        `x=${x + 1} m, y=${y - 1} m`,
-        `x=${y} m, y=${x} m`,
-        `x=${L / 6} m, y=${L / 4} m`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `x=${x}, y=${y}`,
+        distractors,
+        () =>
+          `x=${x + MathUtils.randomInt(-2, 2)} m, y=${y + MathUtils.randomInt(-2, 2)} m`,
+      ),
       steps: [
-        `Równanie długości siatki: $$6x + 4y = ${L}$$.`,
-        `$$y = ${L / 4} - 1.5x$$.`,
-        `Pole całkowite: $$P = 3xy = 3x(${L / 4} - 1.5x) = ${(3 * L) / 4}x - 4.5x^2$$.`,
-        `Wierzchołek $$p = \\frac{-b}{2a} = ${x}$$.`,
-        `$$y = ${y}$$.`,
+        `Równanie długości siatki: $$6x + 4y = ${L}$$ (4 ściany zewnętrzne + 2 wewnętrzne).`,
+        `$$y = ${L / 4} - 1.5x$$ (wyznaczamy y z równania).`,
+        `Pole całkowite 3 wybiegów: $$P = 3xy = 3x(${L / 4} - 1.5x) = ${(3 * L) / 4}x - 4.5x^2$$.`,
+        `To funkcja kwadratowa $$P(x) = -4.5x^2 + ${(3 * L) / 4}x$$ o ramionach w dół.`,
+        `Wierzchołek paraboli (maksimum): $$p = \\frac{-b}{2a} = \\frac{-${(3 * L) / 4}}{2 \\cdot (-4.5)} = ${x}$$.`,
+        `$$y = ${L / 4} - 1.5 \\cdot ${x} = ${y}$$ m.`,
       ],
       questionType: "open",
       answerFormat: "x=a, y=b",
@@ -41,31 +49,40 @@ class GeometricOptimizationGenerator extends BaseGenerator {
   }
 
   generateCuboidProblem() {
-    let rangeS;
-    if (this.difficulty === "easy") {
-      rangeS = [2, 4];
-    } else if (this.difficulty === "hard") {
-      rangeS = [8, 12];
-    } else {
-      rangeS = [4, 8];
-    }
+    const params = GeometricOptimizationValues.getCuboidParams(this.difficulty);
 
-    const S = MathUtils.randomInt(rangeS[0], rangeS[1]) * 12;
+    const S = MathUtils.randomInt(params.rangeS[0], params.rangeS[1]);
     const a = S / 12;
     const h = S / 4 - 2 * a;
     const Pc = 2 * a * a + 4 * a * h;
 
+    const templateFn = MathUtils.randomElement(
+      GeometricOptimizationValues.getCuboidTemplates(),
+    );
+
+    const distractors = GeometricOptimizationValues.generateCuboidDistractors(
+      a,
+      S,
+    );
+
     return this.createResponse({
-      question: `Suma długości wszystkich krawędzi prostopadłościanu o podstawie kwadratowej jest równa $$${S}$$. Oblicz długość krawędzi podstawy $$x$$ tego prostopadłościanu, dla której jego pole powierzchni całkowitej jest największe.`,
+      question: templateFn(S, a, h),
       latex: null,
-      image: null,
+      image: GeometricOptimizationValues.generateCuboidSVG(),
       variables: { S, a, h, Pc },
       correctAnswer: `x = ${a}`,
-      distractors: [`x = ${a + 1}`, `x = ${a / 2}`, `x = ${S / 12 + 1}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `x = ${a}`,
+        distractors,
+        () => `x = ${Math.max(1, a + MathUtils.randomInt(-2, 2))}`,
+      ),
       steps: [
-        `$$8x + 4h = ${S} \\implies h = ${S / 4} - 2x$$.`,
-        `$$P(x) = 2x^2 + 4xh = -6x^2 + ${S}x$$.`,
-        `Wierzchołek $$p = ${a}$$.`,
+        `Prostopadłościan o podstawie kwadratowej ma 8 krawędzi podstawy (4 na dole, 4 na górze) i 4 krawędzie boczne.`,
+        `Suma krawędzi: $$8x + 4h = ${S}$$, więc $$h = ${S / 4} - 2x$$.`,
+        `Pole powierzchni całkowitej: $$P(x) = 2x^2 + 4xh = 2x^2 + 4x(${S / 4} - 2x) = -6x^2 + ${S}x$$.`,
+        `Funkcja $$P(x) = -6x^2 + ${S}x$$ ma maksimum w wierzchołku.`,
+        `$$p = \\frac{-b}{2a} = \\frac{-${S}}{2 \\cdot (-6)} = ${a}$$.`,
+        `Optymalna długość krawędzi podstawy: $$x = ${a}$$.`,
       ],
       questionType: "open",
       answerFormat: "x=a",
@@ -73,80 +90,48 @@ class GeometricOptimizationGenerator extends BaseGenerator {
   }
 
   generateTrapezoidProblem() {
-    let rangeA;
-    if (this.difficulty === "easy") {
-      rangeA = [2, 4];
-    } else if (this.difficulty === "hard") {
-      rangeA = [8, 12];
-    } else {
-      rangeA = [4, 8];
-    }
+    const params = GeometricOptimizationValues.getTrapezoidParams(
+      this.difficulty,
+    );
 
-    const a = MathUtils.randomInt(rangeA[0], rangeA[1]) * 2;
-    const S = a + MathUtils.randomInt(2, 6) * 2;
+    const a = MathUtils.randomInt(params.rangeA[0], params.rangeA[1]);
+    const S = a + MathUtils.randomInt(6, 30) * 2;
     const h_opt = (a + S) / 2;
     const b_opt = S - h_opt;
 
+    const templateFn = MathUtils.randomElement(
+      GeometricOptimizationValues.getTrapezoidTemplates(),
+    );
+
+    const distractors =
+      GeometricOptimizationValues.generateTrapezoidDistractors(h_opt, b_opt, S);
+
     return this.createResponse({
-      question: `Okno ma kształt trapezu równoramiennego. Dłuższa podstawa ma stałą długość $$${a}$$ dm. Suma długości krótszej podstawy i wysokości tego trapezu wynosi $$${S}$$ dm. Oblicz jaką długość powinna mieć wysokość $$h$$ tego okna, aby jego powierzchnia była największa.`,
+      question: templateFn(a, S, h_opt, b_opt),
       latex: null,
-      image: null,
+      image: GeometricOptimizationValues.generateTrapezoidSVG({
+        a,
+        b: b_opt,
+        h: h_opt,
+      }),
       variables: { a, S, h_opt, b_opt },
       correctAnswer: `h = ${h_opt}`,
-      distractors: [`h = ${h_opt - 2}`, `h = ${b_opt}`, `h = ${S / 2}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `h = ${h_opt}`,
+        distractors,
+        () => `h = ${Math.max(1, h_opt + MathUtils.randomInt(-3, 3))}`,
+      ),
       steps: [
-        `$$b + h = ${S} \\implies b = ${S} - h$$.`,
-        `$$P(h) = \\frac{${a} + b}{2}h = -0.5h^2 + ${(a + S) / 2}h$$.`,
-        `Wierzchołek $$p = ${h_opt}$$.`,
+        `Oznaczmy: $$a = ${a}$$ dm (dłuższa podstawa), $$b + h = ${S}$$ (warunek z treści).`,
+        `Krótsza podstawa: $$b = ${S} - h$$.`,
+        `Pole trapezu: $$P(h) = \\frac{a + b}{2} \\cdot h = \\frac{${a} + ${S} - h}{2} \\cdot h = -0.5h^2 + ${(a + S) / 2}h$$.`,
+        `Funkcja kwadratowa $$P(h) = -0.5h^2 + ${(a + S) / 2}h$$ ma maksimum w wierzchołku.`,
+        `$$p = \\frac{-b}{2a} = \\frac{-${(a + S) / 2}}{2 \\cdot (-0.5)} = ${h_opt}$$.`,
+        `Optymalna wysokość: $$h = ${h_opt}$$ dm.`,
       ],
       questionType: "open",
       answerFormat: "h=a",
     });
-  }
-
-  generateGeometrySVG(params) {
-    const size = 300;
-    const cx = 150;
-    const cy = 200;
-
-    if (params.type === "fencing_3") {
-      const w = 200;
-      const h = 100;
-      return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ddd; background:#fff">
-            <rect x="50" y="100" width="${w}" height="${h}" stroke="black" fill="none" stroke-width="2"/>
-            <line x1="${50 + w / 3}" y1="100" x2="${50 + w / 3}" y2="${100 + h}" stroke="black" stroke-width="2"/>
-            <line x1="${50 + (2 * w) / 3}" y1="100" x2="${50 + (2 * w) / 3}" y2="${100 + h}" stroke="black" stroke-width="2"/>
-            <text x="${50 + w / 2}" y="220" font-size="14">3x</text>
-            <text x="30" y="${100 + h / 2}" font-size="14">y</text>
-        </svg>`;
-    }
-
-    if (params.type === "cuboid_opt") {
-      return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ddd; background:#fff">
-            <rect x="100" y="150" width="100" height="100" stroke="black" fill="none" stroke-width="2"/>
-            <line x1="100" y1="150" x2="150" y2="100" stroke="black" stroke-width="2"/>
-            <line x1="200" y1="150" x2="250" y2="100" stroke="black" stroke-width="2"/>
-            <line x1="200" y1="250" x2="250" y2="200" stroke="black" stroke-width="2"/>
-            <rect x="150" y="100" width="100" height="100" stroke="black" fill="none" stroke-width="2" stroke-dasharray="4"/>
-            <text x="140" y="270" font-size="14">x</text>
-            <text x="210" y="200" font-size="14">h</text>
-        </svg>`;
-    }
-
-    if (params.type === "trapezoid_opt") {
-      const scale = 10;
-      const w1 = params.a * scale;
-      const w2 = params.b * scale;
-      const h = params.h * scale;
-      return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ddd; background:#fff">
-            <polygon points="${cx - w2 / 2},${cy - h} ${cx + w2 / 2},${cy - h} ${cx + w1 / 2},${cy} ${cx - w1 / 2},${cy}" stroke="black" fill="none" stroke-width="2"/>
-            <line x1="${cx - w2 / 2}" y1="${cy - h}" x2="${cx - w2 / 2}" y2="${cy}" stroke="blue" stroke-dasharray="4"/>
-            <text x="${cx}" y="${cy + 20}" font-size="14">a=${params.a}</text>
-            <text x="${cx}" y="${cy - h - 10}" font-size="14">b=${params.b}</text>
-            <text x="${cx - w2 / 2 - 20}" y="${cy - h / 2}" font-size="14" fill="blue">h</text>
-        </svg>`;
-    }
-    return "";
   }
 }
 
