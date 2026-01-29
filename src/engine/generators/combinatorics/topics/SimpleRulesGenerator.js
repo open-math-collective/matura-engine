@@ -1,139 +1,185 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
+const SimpleRulesValues = require("../values/SimpleRulesValues");
 
 class SimpleRulesGenerator extends BaseGenerator {
   generateNumbersRule() {
-    let digitsRange, types;
-
-    if (this.difficulty === "easy") {
-      digitsRange = [3, 3];
-      types = ["even", "div10"];
-    } else if (this.difficulty === "hard") {
-      digitsRange = [4, 5];
-      types = ["div5", "no_zero_digit"];
-    } else {
-      digitsRange = [3, 4];
-      types = ["even", "div5", "div10", "no_zero_digit"];
-    }
+    const { digitsRange, types, descriptions } =
+      SimpleRulesValues.getNumbersRuleParams(this.difficulty);
 
     const digits = MathUtils.randomInt(digitsRange[0], digitsRange[1]);
     const type = MathUtils.randomElement(types);
 
-    let count, desc;
-    if (type === "even") {
-      count = 9 * Math.pow(10, digits - 2) * 5;
-      desc = `Pierwsza cyfra: 9 opcji. Kolejne: 10 opcji. Ostatnia (parzysta): 5 opcji.`;
-    } else if (type === "div5") {
-      count = 9 * Math.pow(10, digits - 2) * 2;
-      desc = `Ostatnia cyfra to 0 lub 5 (2 opcje).`;
-    } else if (type === "div10") {
-      count = 9 * Math.pow(10, digits - 2) * 1;
-      desc = `Ostatnia cyfra to 0 (1 opcja).`;
-    } else {
-      count = Math.pow(9, digits);
-      desc = `Na każdym miejscu cyfra od 1 do 9 (9 opcji).`;
-    }
+    const { count, desc, shortDesc } = SimpleRulesValues.calculateNumbersCount(
+      digits,
+      type,
+    );
+
+    const templates = [
+      `Ile jest wszystkich liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}?`,
+      `Oblicz liczbę liczb naturalnych ${SimpleRulesValues.getDigitName(digits)}, które są ${descriptions[type]}.`,
+      `Ile liczb ${SimpleRulesValues.getDigitName(digits)} jest ${descriptions[type]}?`,
+      `Znajdź liczbę wszystkich liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Podaj liczbę liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Wyznacz liczbę liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Ile jest liczb ${SimpleRulesValues.getDigitName(digits)} o własności: ${descriptions[type]}?`,
+      `Oblicz ile liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} spełnia warunek: ${descriptions[type]}.`,
+      `Podaj liczebność zbioru liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Znajdź ile jest liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Ile liczb ${SimpleRulesValues.getDigitName(digits)} należy do zbioru liczb ${descriptions[type]}?`,
+      `Podaj ilość liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Wyznacz ile liczb ${SimpleRulesValues.getDigitName(digits)} jest ${descriptions[type]}.`,
+      `Oblicz liczebność zbioru wszystkich liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Ile elementów ma zbiór liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}?`,
+      `Znajdź liczebność zbioru liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Podaj moc zbioru liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Ile liczb naturalnych ${SimpleRulesValues.getDigitName(digits)} należy do zbioru liczb ${descriptions[type]}?`,
+      `Oblicz moc zbioru wszystkich liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+      `Wyznacz ilość liczb ${SimpleRulesValues.getDigitName(digits)} ${descriptions[type]}.`,
+    ];
+
+    const question = MathUtils.randomElement(templates);
 
     return this.createResponse({
-      question: `Ile jest wszystkich liczb naturalnych ${digits}-cyfrowych ${type === "even" ? "parzystych" : type === "div5" ? "podzielnych przez 5" : type === "div10" ? "podzielnych przez 10" : "w których zapisie nie występuje cyfra 0"}?`,
+      question: question,
       latex: ``,
       image: null,
       variables: { digits, type },
       correctAnswer: `${count}`,
-      distractors: [`${count + 10}`, `${count / 2}`, `${Math.pow(10, digits)}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${count}`,
+        [
+          `${Math.floor(count / 2)}`,
+          `${Math.pow(10, digits)}`,
+          `${Math.floor(count * 1.5)}`,
+          `${Math.floor(count / 5)}`,
+        ],
+        () => {
+          const offset = Math.floor(count * 0.1 * MathUtils.randomInt(1, 5));
+          return `${Math.max(1, count + (Math.random() > 0.5 ? offset : -offset))}`;
+        },
+      ),
       steps: [`Stosujemy regułę mnożenia.`, desc, `Wynik: $$${count}$$`],
       questionType: "closed",
     });
   }
 
   generateDistinctDigits() {
-    let digits;
-    if (this.difficulty === "easy") {
-      digits = 3;
-    } else if (this.difficulty === "hard") {
-      digits = 5;
-    } else {
-      digits = 4;
-    }
+    const { digitsRange } = SimpleRulesValues.getDistinctDigitsParams(
+      this.difficulty,
+    );
 
-    // 9 * 9 * 8 * 7 * ...
-    let res = 9;
-    let current = 9;
-    for (let i = 1; i < digits; i++) {
-      res *= current;
-      current--;
-    }
+    const digits = MathUtils.randomInt(digitsRange[0], digitsRange[1]);
+    const { res, steps } = SimpleRulesValues.calculateDistinctDigits(digits);
 
-    const digitName =
-      digits === 3
-        ? "trzycyfrowych"
-        : digits === 4
-          ? "czterocyfrowych"
-          : "pięciocyfrowych";
+    const digitName = SimpleRulesValues.getDigitName(digits);
+
+    const templates = [
+      `Ile jest wszystkich liczb naturalnych ${digitName} o cyfrach niepowtarzających się?`,
+      `Ile liczb naturalnych ${digitName} ma wszystkie cyfry różne?`,
+      `Na ile sposobów można utworzyć liczbę ${digitName} z różnymi cyframi?`,
+      `Ile jest liczb ${digitName} o parami różnych cyfrach?`,
+      `Ile liczb ${digitName} nie ma powtarzających się cyfr?`,
+      `Oblicz liczbę liczb ${digitName} o różnych cyfrach.`,
+      `Znajdź liczbę wszystkich liczb ${digitName} z niepowtarzającymi się cyframi.`,
+      `Podaj ile jest liczb naturalnych ${digitName} o różnych cyfrach.`,
+      `Wyznacz liczbę liczb ${digitName} bez powtarzających się cyfr.`,
+      `Ile liczb ${digitName} ma cyfry parami różne?`,
+      `Oblicz ile liczb ${digitName} można utworzyć z różnych cyfr.`,
+      `Znajdź ilość liczb ${digitName} o niepowtarzających się cyfrach.`,
+      `Podaj liczbę liczb ${digitName} z różnymi cyframi.`,
+      `Ile jest liczb ${digitName} bez powtórzeń cyfr?`,
+      `Oblicz liczbę możliwych liczb ${digitName} o różnych cyfrach.`,
+      `Wyznacz ilość liczb ${digitName} z niepowtarzającymi się cyframi.`,
+      `Znajdź liczebność zbioru liczb ${digitName} o różnych cyfrach.`,
+      `Ile elementów ma zbiór liczb ${digitName} bez powtórzeń cyfr?`,
+      `Podaj moc zbioru liczb ${digitName} o różnych cyfrach.`,
+      `Oblicz moc zbioru wszystkich liczb ${digitName} z różnymi cyframi.`,
+    ];
 
     return this.createResponse({
-      question: `Ile jest wszystkich liczb naturalnych ${digitName} o cyfrach niepowtarzających się?`,
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: null,
       variables: { digits },
       correctAnswer: `${res}`,
-      distractors: [
-        `${9 * Math.pow(10, digits - 1)}`,
-        `${Math.pow(9, digits)}`,
-        `${res * 2}`,
-      ],
-      steps: [
-        `Pierwsza cyfra: 9 opcji (bez 0).`,
-        `Druga: 9 opcji (bo dochodzi 0, odpada użyta).`,
-        `Trzecia: 8 opcji.`,
-        digits > 3 ? `Kolejne: coraz mniej o 1.` : ``,
-        `Wynik: $$${res}$$`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${res}`,
+        [
+          `${9 * Math.pow(10, digits - 1)}`,
+          `${Math.pow(9, digits)}`,
+          `${res * 2}`,
+          `${Math.pow(10, digits) - Math.pow(9, digits)}`,
+        ],
+        () => {
+          const offset =
+            MathUtils.randomElement([1, -1, 10, -10]) *
+            MathUtils.randomInt(1, 10);
+          return `${Math.max(1, res + offset)}`;
+        },
+      ),
+      steps: steps.concat([`Wynik: $$${res}$$`]),
       questionType: "closed",
     });
   }
 
   generateNumbersFromSet() {
-    let nRange, setTypes;
-
-    if (this.difficulty === "easy") {
-      nRange = [2, 3];
-      setTypes = ["small"];
-    } else if (this.difficulty === "hard") {
-      nRange = [4, 6];
-      setTypes = ["prime", "odd"];
-    } else {
-      nRange = [3, 4];
-      setTypes = ["odd", "small", "prime"];
-    }
+    const { nRange, setTypes } = SimpleRulesValues.getNumbersFromSetParams(
+      this.difficulty,
+    );
 
     const setType = MathUtils.randomElement(setTypes);
-    let setDigits, setName;
-
-    if (setType === "odd") {
-      setDigits = [1, 3, 5, 7, 9];
-      setName = "nieparzystych";
-    } else if (setType === "small") {
-      setDigits = [1, 2, 3, 4];
-      setName = "należących do zbioru {1, 2, 3, 4}";
-    } else {
-      setDigits = [2, 3, 5, 7];
-      setName = "będących cyframi pierwszymi";
-    }
+    const setInfo = SimpleRulesValues.getDigitSet(setType);
 
     const n = MathUtils.randomInt(nRange[0], nRange[1]);
-    const k = setDigits.length;
+    const k = setInfo.digits.length;
     const res = Math.pow(k, n);
 
+    const templates = [
+      `Ile jest wszystkich liczb naturalnych ${SimpleRulesValues.getDigitName(n)}, których zapis dziesiętny składa się wyłącznie z cyfr ${setInfo.desc}?`,
+      `Na ile sposobów można utworzyć liczbę ${SimpleRulesValues.getDigitName(n)} używając tylko cyfr ${setInfo.desc}?`,
+      `Ile liczb ${SimpleRulesValues.getDigitName(n)} ma wszystkie cyfry ze zbioru {${setInfo.digits.join(", ")}}?`,
+      `Z cyfr {${setInfo.digits.join(", ")}} tworzymy liczby ${SimpleRulesValues.getDigitName(n)}. Ile można utworzyć?`,
+      `Oblicz liczbę liczb ${SimpleRulesValues.getDigitName(n)} z cyfr ${setInfo.desc}.`,
+      `Znajdź liczbę wszystkich liczb ${SimpleRulesValues.getDigitName(n)} używających tylko cyfr ${setInfo.desc}.`,
+      `Ile liczb ${SimpleRulesValues.getDigitName(n)} składa się wyłącznie z cyfr ${setInfo.desc}?`,
+      `Podaj liczbę liczb ${SimpleRulesValues.getDigitName(n)} o cyfrach ze zbioru {${setInfo.digits.join(", ")}}.`,
+      `Wyznacz liczbę liczb ${SimpleRulesValues.getDigitName(n)} z cyfr ${setInfo.desc}.`,
+      `Oblicz ile liczb ${SimpleRulesValues.getDigitName(n)} można zapisać używając cyfr ${setInfo.desc}.`,
+      `Znajdź ilość liczb ${SimpleRulesValues.getDigitName(n)} z cyframi ze zbioru {${setInfo.digits.join(", ")}}.`,
+      `Ile jest liczb ${SimpleRulesValues.getDigitName(n)} używających tylko cyfr ${setInfo.desc}?`,
+      `Podaj ilość liczb ${SimpleRulesValues.getDigitName(n)} o cyfrach ${setInfo.desc}.`,
+      `Wyznacz ilość wszystkich liczb ${SimpleRulesValues.getDigitName(n)} z cyfr ${setInfo.desc}.`,
+      `Oblicz liczbę możliwych liczb ${SimpleRulesValues.getDigitName(n)} ze zbioru cyfr {${setInfo.digits.join(", ")}}.`,
+      `Znajdź liczebność zbioru liczb ${SimpleRulesValues.getDigitName(n)} z cyframi ${setInfo.desc}.`,
+      `Ile elementów ma zbiór liczb ${SimpleRulesValues.getDigitName(n)} używających cyfr ${setInfo.desc}?`,
+      `Podaj moc zbioru liczb ${SimpleRulesValues.getDigitName(n)} o cyfrach ${setInfo.desc}.`,
+      `Oblicz moc zbioru wszystkich liczb ${SimpleRulesValues.getDigitName(n)} z cyfr {${setInfo.digits.join(", ")}}.`,
+      `Wyznacz liczebność zbioru liczb ${SimpleRulesValues.getDigitName(n)} ze zbioru cyfr {${setInfo.digits.join(", ")}}.`,
+    ];
+
     return this.createResponse({
-      question: `Ile jest wszystkich liczb naturalnych ${n}-cyfrowych, których zapis dziesiętny składa się wyłącznie z cyfr ${setName}?`,
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: null,
       variables: { n, k, setType },
       correctAnswer: `${res}`,
-      distractors: [`${Math.pow(10, n)}`, `${n * k}`, `${Math.pow(n - 1, k)}`],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${res}`,
+        [
+          `${Math.pow(10, n)}`,
+          `${n * k}`,
+          `${Math.pow(n - 1, k)}`,
+          `${Math.pow(k, n - 1)}`,
+          `${Math.pow(k + 1, n)}`,
+        ],
+        () => {
+          const fakeK = k + MathUtils.randomElement([-1, 1]);
+          return `${Math.pow(Math.max(1, fakeK), n)}`;
+        },
+      ),
       steps: [
-        `Dostępne cyfry to: $$${setDigits.join(", ")}$$. Jest ich $$${k}$$.`,
+        `Dostępne cyfry to: $$${setInfo.digits.join(", ")}$$. Jest ich $$${k}$$.`,
         `$$${Array(n).fill(k).join(" \\cdot ")} = ${k}^{${n}} = ${res}$$`,
       ],
       questionType: "closed",
@@ -141,28 +187,46 @@ class SimpleRulesGenerator extends BaseGenerator {
   }
 
   generateSumOfDigits() {
-    let sumRange;
-    if (this.difficulty === "easy") {
-      sumRange = [2, 3];
-    } else if (this.difficulty === "hard") {
-      sumRange = [6, 7];
-    } else {
-      sumRange = [4, 5];
-    }
+    const { sumRange } = SimpleRulesValues.getSumOfDigitsParams(
+      this.difficulty,
+    );
 
     const sumTarget = MathUtils.randomInt(sumRange[0], sumRange[1]);
-    let count = 0;
-    let examples = [];
+    const { count, examples } =
+      SimpleRulesValues.calculateSumOfDigits(sumTarget);
 
-    for (let h = 1; h <= 9; h++) {
-      for (let t = 0; t <= 9; t++) {
-        const u = sumTarget - h - t;
-        if (u >= 0 && u <= 9) {
-          count++;
-          if (examples.length < 5) examples.push(`${h}${t}${u}`);
-        }
-      }
-    }
+    const templates = [
+      `Ile jest wszystkich liczb naturalnych trzycyfrowych, których suma cyfr jest równa $$${sumTarget}$$?`,
+      `Ile liczb trzycyfrowych ma sumę cyfr równą $$${sumTarget}$$?`,
+      `Na ile sposobów można utworzyć liczbę trzycyfrową o sumie cyfr $$${sumTarget}$$?`,
+      `Ile trzycyfrowych liczb naturalnych ma sumę cyfr $$${sumTarget}$$?`,
+      `Oblicz liczbę liczb trzycyfrowych o sumie cyfr $$${sumTarget}$$.`,
+      `Znajdź liczbę wszystkich liczb trzycyfrowych z sumą cyfr $$${sumTarget}$$.`,
+      `Ile liczb trzycyfrowych spełnia warunek: suma cyfr = $$${sumTarget}$$?`,
+      `Podaj liczbę liczb trzycyfrowych o sumie cyfr równej $$${sumTarget}$$.`,
+      `Wyznacz liczbę liczb trzycyfrowych z sumą cyfr $$${sumTarget}$$.`,
+      `Oblicz ile liczb trzycyfrowych ma sumę cyfr $$${sumTarget}$$.`,
+      `Znajdź ilość liczb trzycyfrowych o sumie cyfr $$${sumTarget}$$.`,
+      `Ile jest liczb trzycyfrowych o sumie cyfr równej $$${sumTarget}$$?`,
+      `Podaj ilość liczb trzycyfrowych z sumą cyfr $$${sumTarget}$$.`,
+      `Wyznacz ilość wszystkich liczb trzycyfrowych o sumie cyfr $$${sumTarget}$$.`,
+      `Oblicz liczbę możliwych liczb trzycyfrowych z sumą cyfr $$${sumTarget}$$.`,
+      `Znajdź liczebność zbioru liczb trzycyfrowych o sumie cyfr $$${sumTarget}$$.`,
+      `Ile elementów ma zbiór liczb trzycyfrowych o sumie cyfr $$${sumTarget}$$?`,
+      `Podaj moc zbioru liczb trzycyfrowych z sumą cyfr $$${sumTarget}$$.`,
+      `Oblicz moc zbioru wszystkich liczb trzycyfrowych o sumie cyfr $$${sumTarget}$$.`,
+      `Wyznacz liczebność zbioru liczb trzycyfrowych z sumą cyfr $$${sumTarget}$$.`,
+      `Znajdź wszystkie liczby trzycyfrowe o sumie cyfr $$${sumTarget}$$ i podaj ich liczbę.`,
+      `Policz ile liczb trzycyfrowych ma sumę cyfr równą dokładnie $$${sumTarget}$$.`,
+      `Ile jest takich liczb trzycyfrowych, że suma ich cyfr wynosi $$${sumTarget}$$?`,
+      `Podaj liczbę wszystkich trzycyfrowych liczb naturalnych o sumie cyfr $$${sumTarget}$$.`,
+      `Oblicz ile istnieje liczb trzycyfrowych o sumie cyfr równej $$${sumTarget}$$.`,
+      `Wyznacz ilość trzycyfrowych liczb o sumie cyfr równej $$${sumTarget}$$.`,
+      `Znajdź ilość wszystkich liczb trzycyfrowych, których suma cyfr to $$${sumTarget}$$.`,
+      `Policz wszystkie liczby trzycyfrowe o sumie cyfr równej $$${sumTarget}$$.`,
+      `Ile liczb trzycyfrowych spełnia warunek, że suma cyfr jest równa $$${sumTarget}$$?`,
+      `Podaj liczbę trzycyfrowych liczb naturalnych o sumie cyfr równej $$${sumTarget}$$.`,
+    ];
 
     const candidates = [
       count - 1,
@@ -173,6 +237,8 @@ class SimpleRulesGenerator extends BaseGenerator {
       sumTarget + 10,
       count + 5,
       Math.max(1, count - 2),
+      count * 2,
+      Math.floor(count / 2),
     ];
 
     const uniqueDistractors = [];
@@ -180,7 +246,7 @@ class SimpleRulesGenerator extends BaseGenerator {
     usedValues.add(count);
 
     for (const val of candidates) {
-      if (val > 0 && !usedValues.has(val)) {
+      if (val > 0 && !usedValues.has(val) && val < 1000) {
         uniqueDistractors.push(`${val}`);
         usedValues.add(val);
       }
@@ -198,7 +264,7 @@ class SimpleRulesGenerator extends BaseGenerator {
     }
 
     return this.createResponse({
-      question: `Ile jest wszystkich liczb naturalnych trzycyfrowych, których suma cyfr jest równa $$${sumTarget}$$?`,
+      question: MathUtils.randomElement(templates),
       latex: ``,
       image: null,
       variables: { sumTarget, count },
@@ -214,33 +280,40 @@ class SimpleRulesGenerator extends BaseGenerator {
   }
 
   generateMixedCodes() {
-    let lRange, dRange;
-    if (this.difficulty === "easy") {
-      lRange = [1, 2];
-      dRange = [1, 2];
-    } else if (this.difficulty === "hard") {
-      lRange = [3, 4];
-      dRange = [3, 5];
-    } else {
-      lRange = [2, 3];
-      dRange = [2, 4];
-    }
+    const { lettersRange, digitsRange } = SimpleRulesValues.getMixedCodesParams(
+      this.difficulty,
+    );
 
-    const lettersCount = MathUtils.randomInt(lRange[0], lRange[1]);
-    const digitsCount = MathUtils.randomInt(dRange[0], dRange[1]);
+    const lettersCount = MathUtils.randomInt(lettersRange[0], lettersRange[1]);
+    const digitsCount = MathUtils.randomInt(digitsRange[0], digitsRange[1]);
     const latexRes = `26^{${lettersCount}} \\cdot 10^{${digitsCount}}`;
 
+    const q = SimpleRulesValues.getMixedCodesTemplates(
+      lettersCount,
+      digitsCount,
+    );
+
     return this.createResponse({
-      question: `Ile różnych kodów można utworzyć, jeżeli każdy kod składa się z $$${lettersCount}$$ liter (wybranych z 26 liter alfabetu łacińskiego) oraz $$${digitsCount}$$ cyfr (arabskich)? Zakładamy, że najpierw występują litery, a potem cyfry, i mogą się one powtarzać.`,
+      question: q,
       latex: ``,
       image: null,
       variables: { lettersCount, digitsCount },
       correctAnswer: latexRes,
-      distractors: [
-        `26 \\cdot 10`,
-        `${lettersCount + digitsCount}^{26+10}`,
-        `26 \\cdot ${lettersCount} + 10 \\cdot ${digitsCount}`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        latexRes,
+        [
+          `26 \\cdot 10`,
+          `${lettersCount + digitsCount}^{36}`,
+          `26 \\cdot ${lettersCount} + 10 \\cdot ${digitsCount}`,
+          `26^{${lettersCount + digitsCount}}`,
+          `10^{${lettersCount + digitsCount}}`,
+        ],
+        () => {
+          const fakeLetters = lettersCount + MathUtils.randomElement([-1, 1]);
+          const fakeDigits = digitsCount + MathUtils.randomElement([-1, 1]);
+          return `26^{${fakeLetters}} \\cdot 10^{${fakeDigits}}`;
+        },
+      ),
       steps: [
         `Mamy $$${lettersCount}$$ miejsc na litery i $$${digitsCount}$$ miejsc na cyfry.`,
         `$$26^{${lettersCount}}$$ (litery) $$\\cdot$$ $$10^{${digitsCount}}$$ (cyfry)`,
