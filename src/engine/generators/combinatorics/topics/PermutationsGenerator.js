@@ -1,130 +1,264 @@
 const BaseGenerator = require("../../../core/BaseGenerator");
 const MathUtils = require("../../../utils/MathUtils");
+const PermutationsValues = require("../values/PermutationsValues");
 
 class PermutationsGenerator extends BaseGenerator {
   generateQueueProblem() {
-    let nRange;
-
-    if (this.difficulty === "easy") {
-      nRange = [3, 4];
-    } else if (this.difficulty === "hard") {
-      nRange = [7, 8]; // 7! = 5040, 8! = 40320
-    } else {
-      nRange = [5, 6];
-    }
+    const { nRange, scenarios, usePartial } =
+      PermutationsValues.getQueueProblemParams(this.difficulty);
 
     const n = MathUtils.randomInt(nRange[0], nRange[1]);
-    let res = this.factorial(n);
+    const scenario = MathUtils.randomElement(scenarios);
+
+    let res, q, steps;
+
+    const partialScenarios = [
+      "arrangement",
+      "tournament",
+      "podium",
+      "seats",
+      "stations",
+      "queue",
+      "row",
+      "shelf",
+      "line",
+      "circle",
+      "photo",
+      "order",
+    ];
+
+    if (usePartial && partialScenarios.includes(scenario)) {
+      const maxK = Math.min(n - 1, 5);
+      const k = MathUtils.randomInt(2, maxK);
+
+      if (scenario === "circle") {
+        res = Math.floor(PermutationsValues.permutation(n, k) / k);
+        q = PermutationsValues.getPartialPermutationTemplates(scenario, n, k);
+        steps = [
+          `Liczba permutacji ${k} osób z $$${n}$$ w okręgu: $$\\frac{P(n,k)}{k}$$`,
+          `$$\\frac{${n} \\cdot ${n - 1} \\cdot ... \\cdot ${n - k + 1}}{${k}} = ${res}$$`,
+        ];
+      } else {
+        res = PermutationsValues.permutation(n, k);
+        q = PermutationsValues.getPartialPermutationTemplates(scenario, n, k);
+        steps = [
+          `Liczba permutacji $$k$$-elementowych ze zbioru $$n$$-elementowego: $$P(n,k) = \\frac{n!}{(n-k)!}$$`,
+          `$$P(${n},${k}) = ${n} \\cdot ${n - 1} \\cdot ... \\cdot ${n - k + 1} = ${res}$$`,
+        ];
+      }
+    } else {
+      const isCircle = scenario === "circle";
+      res = isCircle
+        ? PermutationsValues.circularPermutation(n)
+        : PermutationsValues.factorial(n);
+
+      q = PermutationsValues.getQueueTemplates(scenario, n);
+
+      steps = isCircle
+        ? [
+            `W układzie okrągłym (permutacje cykliczne) liczba ustawień to $$(n-1)!$$.`,
+            `$$(${n}-1)! = ${n - 1}! = ${res}$$`,
+          ]
+        : [
+            `Liczba permutacji zbioru $$n$$-elementowego to $$n!$$.`,
+            `$$${n}! = ${res}$$`,
+          ];
+    }
 
     return this.createResponse({
-      question: `Na ile sposobów $$${n}$$ osób może ustawić się w kolejce do kasy?`,
+      question: q,
       latex: null,
       image: null,
-      variables: { n },
+      variables: { n, scenario },
       correctAnswer: `${res}`,
-      distractors: [`${n * n}`, `${n}`, `${res / 2}`],
-      steps: [
-        `Liczba permutacji zbioru $$n$$-elementowego to $$n!$$.`,
-        `$$${n}! = ${res}$$`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${res}`,
+        [`${n * n}`, `${n}`, `${Math.floor(res / 2)}`, `${res + n}`],
+        () => {
+          const multiplier = MathUtils.randomElement([2, 0.5, n, n - 1]);
+          return `${Math.floor(res * multiplier)}`;
+        },
+      ),
+      steps: steps,
       questionType: "open",
       answerFormat: "number",
     });
   }
 
   generateFlagProblem() {
-    let kRange;
+    const { kRange, stripeCounts, repetitionOptions } =
+      PermutationsValues.getFlagProblemParams(this.difficulty);
 
-    if (this.difficulty === "easy") {
-      kRange = [3, 4];
-    } else if (this.difficulty === "hard") {
-      kRange = [6, 9];
+    const stripeCount = MathUtils.randomElement(stripeCounts);
+    const distinct = MathUtils.randomElement(repetitionOptions);
+
+    const maxSafeK = {
+      2: 100000, // P(100000,2) = 1e10
+      3: 30000, // P(30000,3) ~= 2.7e13
+      4: 1000, // P(1000,4) ~= 1e12
+      5: 500, // P(500,5) ~= 3e13
+      6: 200, // P(200,6) ~= 4e13
+      7: 100, // P(100,7) ~= 8e13
+    };
+    const safeMaxK = Math.min(kRange[1], maxSafeK[stripeCount] || 50);
+    const k = MathUtils.randomInt(kRange[0], safeMaxK);
+
+    const res = distinct
+      ? PermutationsValues.permutation(k, stripeCount)
+      : Math.pow(k, stripeCount);
+
+    const q = PermutationsValues.getFlagTemplates(k, stripeCount, distinct);
+
+    let steps;
+    if (distinct) {
+      const parts = [];
+      for (let i = 0; i < stripeCount; i++) {
+        parts.push(`${k - i}`);
+      }
+      steps = [
+        `Pierwszy pas: ${k} opcji. Drugi: ${k - 1} opcji. ` +
+          (stripeCount > 2 ? `Trzeci: ${k - 2} opcji.` : ""),
+        `$$${parts.join(" \\cdot ")} = ${res}$$`,
+      ];
     } else {
-      kRange = [4, 6];
+      steps = [
+        `Każdy pas możemy wybrać na ${k} sposobów.`,
+        `$$${k}^{${stripeCount}} = ${res}$$`,
+      ];
     }
 
-    const k = MathUtils.randomInt(kRange[0], kRange[1]);
-    const distinct = MathUtils.randomElement([true, false]);
-    const res = distinct ? k * (k - 1) * (k - 2) : k * k * k;
-
     return this.createResponse({
-      question: `Mamy do dyspozycji $$${k}$$ kolorów materiału. Szyjemy flagę z trzech poziomych pasów jednakowej szerokości. Ile różnych flag można uszyć, jeśli kolory pasów ${distinct ? "nie mogą się powtarzać" : "mogą się powtarzać"}?`,
+      question: q,
       latex: null,
       image: null,
-      variables: { k, distinct },
+      variables: { k, stripeCount, distinct },
       correctAnswer: `${res}`,
-      distractors: [
-        distinct ? `${k * k * k}` : `${k * (k - 1) * (k - 2)}`,
-        `${k * 3}`,
-        `${Math.pow(3, k)}`,
-      ],
-      steps: [
-        distinct
-          ? `Pierwszy pas: ${k} opcji. Drugi: ${k - 1} opcji. Trzeci: ${k - 2} opcji.`
-          : `Każdy pas możemy wybrać na ${k} sposobów.`,
-        distinct
-          ? `$$${k} \\cdot ${k - 1} \\cdot ${k - 2} = ${res}$$`
-          : `$$${k} \\cdot ${k} \\cdot ${k} = ${res}$$`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${res}`,
+        [
+          distinct
+            ? `${Math.pow(k, stripeCount)}`
+            : `${PermutationsValues.permutation(k, stripeCount)}`,
+          `${k * stripeCount}`,
+          `${Math.pow(stripeCount, k)}`,
+        ],
+        () => {
+          const offset = MathUtils.randomInt(1, 3);
+          const fakeK = k + offset;
+          const fake = distinct
+            ? PermutationsValues.permutation(fakeK, stripeCount)
+            : Math.pow(fakeK, stripeCount);
+          return `${fake}`;
+        },
+      ),
+      steps: steps,
       questionType: "open",
       answerFormat: "number",
     });
   }
 
   generateSeatingConstraint() {
-    let nRange;
-
-    if (this.difficulty === "easy") {
-      nRange = [3, 4];
-    } else if (this.difficulty === "hard") {
-      nRange = [7, 8];
-    } else {
-      nRange = [5, 6];
-    }
+    const { nRange, constraintTypes, personNames } =
+      PermutationsValues.getSeatingConstraintParams(this.difficulty);
 
     const n = MathUtils.randomInt(nRange[0], nRange[1]);
-    const type = MathUtils.randomElement(["together", "fixed_first"]);
+    const type = MathUtils.randomElement(constraintTypes);
+
+    const availableNames = [...personNames];
+    const name1 = MathUtils.randomElement(availableNames);
+    const name2 = availableNames.filter((n) => n !== name1)[
+      MathUtils.randomInt(0, availableNames.length - 2)
+    ];
+    const name3 = availableNames.filter((n) => n !== name1 && n !== name2)[
+      MathUtils.randomInt(0, availableNames.length - 3)
+    ];
+
     let res, desc;
 
-    if (type === "together") {
-      let fact = this.factorial(n - 1);
-      res = fact * 2;
-      desc = `Sklejamy osoby A i B w jeden element. Mamy wtedy $$${n - 1}$$ elementów do ustawienia ($$${n - 1}!$$). Osoby A i B mogą zamienić się miejscami ($$\\cdot 2$$).`;
-    } else {
-      let fact = this.factorial(n - 1);
-      res = fact;
-      desc = `Skoro pierwsza osoba jest ustalona, to pozostałe $$${n - 1}$$ osób ustawiamy dowolnie na $$${n - 1}$$ miejscach.`;
+    switch (type) {
+      case "together": {
+        // (n-1)! * 2
+        const fact = PermutationsValues.factorial(n - 1);
+        res = fact * 2;
+        desc = `Sklejamy ${name1} i ${name2} w jeden element. Mamy wtedy $$${n - 1}$$ elementów do ustawienia ($$${n - 1}!$$). Osoby te mogą zamienić się miejscami ($$\\cdot 2$$).`;
+        break;
+      }
+      case "fixed_first": {
+        // (n-1)!
+        res = PermutationsValues.factorial(n - 1);
+        desc = `Skoro ${name1} jest ustalony na pierwszym miejscu, to pozostałe $$${n - 1}$$ osób ustawiamy dowolnie.`;
+        break;
+      }
+      case "fixed_position": {
+        // (n-1)!
+        res = PermutationsValues.factorial(n - 1);
+        desc = `${name1} ma ustaloną pozycję, więc pozostałe $$${n - 1}$$ osób ustawiamy na $$${n - 1}$$ miejscach.`;
+        break;
+      }
+      case "apart": {
+        // n! - (n-1)! * 2
+        const total = PermutationsValues.factorial(n);
+        const together = PermutationsValues.factorial(n - 1) * 2;
+        res = total - together;
+        desc = `Od wszystkich permutacji ($$${n}! = ${total}$$) odejmujemy te, gdzie siedzą razem ($$(${n}-1)! \\cdot 2 = ${together}$$).`;
+        break;
+      }
+      case "ends": {
+        // 2! * (n-2)!
+        const innerFact = PermutationsValues.factorial(n - 2);
+        res = 2 * innerFact;
+        desc = `${name1} i ${name2} mogą zamienić się miejscami na krańcach ($$2!$$), a pozostałe $$${n - 2}$$ osób ustawiamy na środku ($$${n - 2}!$$).`;
+        break;
+      }
+      case "together_three": {
+        // (n-2)! * 3!
+        const groupFact = PermutationsValues.factorial(n - 2);
+        res = groupFact * 6; // 3! = 6
+        desc = `Traktujemy trójkę jako jeden element. Mamy $$${n - 2}$$ elementów ($$${n - 2}!$$), a wewnątrz trójki mamy $$3!$$ permutacji.`;
+        break;
+      }
+      default: {
+        const fact = PermutationsValues.factorial(n - 1);
+        res = fact * 2;
+        desc = `Sklejamy ${name1} i ${name2} w jeden element. Mamy $$${n - 1}$$ elementów do ustawienia ($$${n - 1}!$$).`;
+      }
     }
 
+    const q = PermutationsValues.getSeatingConstraintTemplates(
+      type,
+      n,
+      name1,
+      name2,
+      name3,
+    );
+
     return this.createResponse({
-      question:
-        type === "together"
-          ? `Na ile sposobów $$${n}$$ osób (w tym Kasia i Tomek) może usiąść w rzędzie tak, aby Kasia i Tomek siedzieli obok siebie?`
-          : `Na ile sposobów $$${n}$$ osób może ustawić się w kolejce, jeśli Pan X musi stać na pierwszym miejscu?`,
+      question: q,
       latex: ``,
       image: null,
-      variables: { n, type },
+      variables: { n, type, name1, name2 },
       correctAnswer: `${res}`,
-      distractors: [
-        `${this.factorial(n)}`,
-        type === "together" ? `${res / 2}` : `${res * n}`,
-        `${n * n}`,
-      ],
-      steps: [
-        desc,
-        type === "together"
-          ? `$$(${n}-1)! \\cdot 2 = ${res / 2} \\cdot 2 = ${res}$$`
-          : `$$(${n}-1)! = ${res}$$`,
-      ],
+      distractors: MathUtils.ensureUniqueDistractors(
+        `${res}`,
+        [
+          `${PermutationsValues.factorial(n)}`,
+          `${PermutationsValues.factorial(n - 1)}`,
+          `${Math.abs(res - n)}`,
+        ],
+        () => {
+          const offset = MathUtils.randomElement([
+            1,
+            -1,
+            n,
+            PermutationsValues.factorial(n - 2),
+          ]);
+          return `${Math.abs(res + offset)}`;
+        },
+      ),
+      steps: [desc, `Wynik: $$${res}$$`],
       questionType: "open",
       answerFormat: "number",
     });
-  }
-
-  factorial(n) {
-    let res = 1;
-    for (let i = 1; i <= n; i++) res *= i;
-    return res;
   }
 
   generateSVG(params) {
