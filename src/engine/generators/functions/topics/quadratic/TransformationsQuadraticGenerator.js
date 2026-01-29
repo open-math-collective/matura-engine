@@ -1,29 +1,17 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
 const SVGUtils = require("../../../../utils/SVGUtils");
+const TransformationsQuadraticValues = require("../../values/TransformationsQuadraticValues");
 
 class TransformationsQuadraticGenerator extends BaseGenerator {
   generateShiftParabolaProblem() {
-    // f(x) = ax^2,  v=[p, q]
-    // g(x) = a(x-p)^2 + q
-    // a(x^2 - 2px + p^2) + q = ax^2 - 2apx + (ap^2 + q)
+    const params = TransformationsQuadraticValues.getShiftParabolaParams(
+      this.difficulty,
+    );
 
-    let aList, rangeV;
-
-    if (this.difficulty === "easy") {
-      aList = [1];
-      rangeV = [-3, 3];
-    } else if (this.difficulty === "hard") {
-      aList = [2, -2];
-      rangeV = [-6, 6];
-    } else {
-      aList = [-1, 1];
-      rangeV = [-5, 5];
-    }
-
-    const a = MathUtils.randomElement(aList);
-    const p = MathUtils.randomInt(rangeV[0], rangeV[1]);
-    const q = MathUtils.randomInt(rangeV[0], rangeV[1]);
+    const a = MathUtils.randomElement(params.aList);
+    const p = MathUtils.randomInt(params.rangeV[0], params.rangeV[1]);
+    const q = MathUtils.randomInt(params.rangeV[0], params.rangeV[1]);
 
     // g(x) = Ax^2 + Bx + C
     const A = a;
@@ -33,25 +21,31 @@ class TransformationsQuadraticGenerator extends BaseGenerator {
     const formulaBase = `${a === 1 ? "" : a === -1 ? "-" : a}x^2`;
     const formulaNew = MathUtils.formatPolynomial(A, B, C);
 
-    // bad sign for B
-    const dist1 = MathUtils.formatPolynomial(A, -B, C);
-    // bad sign for C
-    const dist2 = MathUtils.formatPolynomial(A, B, -C);
-    // forgotten p^2 in C
-    const wrongC = p * p + q;
-    const dist3 = MathUtils.formatPolynomial(A, B, wrongC);
+    const templates = TransformationsQuadraticValues.getShiftParabolaTemplates(
+      formulaBase,
+      p,
+      q,
+    );
+    const question = MathUtils.randomElement(templates)();
+
+    const correctAnswer = `g(x) = ${formulaNew}`;
+    const distractors =
+      TransformationsQuadraticValues.generateShiftParabolaDistractors(
+        A,
+        B,
+        C,
+        p,
+        formulaNew,
+        MathUtils.formatPolynomial.bind(MathUtils),
+      );
 
     return this.createResponse({
-      question: `Wykres funkcji $$f(x)=${formulaBase}$$ przesunięto o wektor $$v=[${p}, ${q}]$$. Jaki jest nowy wzór funkcji?`,
+      question: question,
       latex: null,
       image: null,
       variables: { a, p, q },
-      correctAnswer: `g(x) = ${formulaNew}`,
-      distractors: [
-        `g(x) = ${dist1}`,
-        `g(x) = ${dist2}`,
-        `g(x) = ${dist3 !== formulaNew ? dist3 : MathUtils.formatPolynomial(A, 0, C)}`,
-      ],
+      correctAnswer: correctAnswer,
+      distractors: distractors,
       steps: [
         `Przesunięcie o wektor $$[p, q]$$ oznacza, że do wzoru wstawiamy $$(x-p)$$ zamiast $$x$$ i dodajemy $$q$$ na końcu.`,
         `Postać kanoniczna: $$g(x) = ${a}(x - (${p}))^2 + (${q})$$`,
@@ -66,23 +60,15 @@ class TransformationsQuadraticGenerator extends BaseGenerator {
   }
 
   generateInequalityGraphProblem() {
-    let aList, rootRange;
+    const params = TransformationsQuadraticValues.getInequalityGraphParams(
+      this.difficulty,
+    );
 
-    if (this.difficulty === "easy") {
-      aList = [1];
-      rootRange = [-3, 3];
-    } else if (this.difficulty === "hard") {
-      aList = [-1];
-      rootRange = [-6, 6];
-    } else {
-      aList = [-1, 1];
-      rootRange = [-5, 5];
-    }
-
-    const a = MathUtils.randomElement(aList);
-    const x1 = MathUtils.randomInt(rootRange[0], rootRange[1]);
-    let x2 = MathUtils.randomInt(rootRange[0], rootRange[1]);
-    while (x1 === x2) x2 = MathUtils.randomInt(rootRange[0], rootRange[1]);
+    const a = MathUtils.randomElement(params.aList);
+    const x1 = MathUtils.randomInt(params.rootRange[0], params.rootRange[1]);
+    let x2 = MathUtils.randomInt(params.rootRange[0], params.rootRange[1]);
+    while (x1 === x2)
+      x2 = MathUtils.randomInt(params.rootRange[0], params.rootRange[1]);
 
     const b = -a * (x1 + x2);
     const c = a * x1 * x2;
@@ -103,12 +89,12 @@ class TransformationsQuadraticGenerator extends BaseGenerator {
     const minX = Math.min(x1, x2);
     const maxX = Math.max(x1, x2);
 
-    // Up & > 0 (Gr) -> outside
-    // Up & < 0     -> inside
-    // Down & > 0   -> inside
-    // Down & < 0   -> outside
+    // up & > 0 (gr) -> outside
+    // up & < 0      -> inside
+    // down & > 0    -> inside
+    // down & < 0    -> outside
 
-    // (!Up && Gr) || (Up && !Gr) -> XOR logic
+    // (!up && gr) || (up && !gr) -> xor logic
     const isInside = isUp !== isGr;
 
     let res;
@@ -118,8 +104,37 @@ class TransformationsQuadraticGenerator extends BaseGenerator {
       res = `(-\\infty, ${minX}${brR} \\cup ${brL}${maxX}, \\infty)`;
     }
 
+    const templates =
+      TransformationsQuadraticValues.getInequalityGraphTemplates(
+        a,
+        sign,
+        minX,
+        maxX,
+        res,
+      );
+    const question = MathUtils.randomElement(templates)();
+
+    const correctAnswer = `x \\in ${res}`;
+    const distractors =
+      TransformationsQuadraticValues.generateInequalityGraphDistractors(
+        isInside,
+        minX,
+        maxX,
+        res,
+      );
+
+    const uniqueDistractors = [];
+    const used = new Set([correctAnswer]);
+    for (const d of distractors) {
+      if (!used.has(d)) {
+        uniqueDistractors.push(d);
+        used.add(d);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
     return this.createResponse({
-      question: `Na rysunku przedstawiono fragment wykresu funkcji kwadratowej. Zbiór rozwiązań nierówności $$f(x) ${sign} 0$$ to:`,
+      question: question,
       latex: ``,
       image: SVGUtils.generateSVG({
         a,
@@ -132,12 +147,8 @@ class TransformationsQuadraticGenerator extends BaseGenerator {
         highlight: "roots",
       }),
       variables: { x1, x2, a, sign },
-      correctAnswer: `x \\in ${res}`,
-      distractors: [
-        `x \\in ${isInside ? `(-\\infty, ${minX}) \\cup (${maxX}, \\infty)` : `(${minX}, ${maxX})`}`,
-        `x \\in \\langle ${minX - 1}, ${maxX + 1} \\rangle`,
-        `x \\in \\mathbb{R}`,
-      ],
+      correctAnswer: correctAnswer,
+      distractors: uniqueDistractors,
       steps: [
         `Odczytujemy z wykresu miejsca zerowe: $$x_1 = ${minX}, x_2 = ${maxX}$$.`,
         `Parabola ma ramiona skierowane w ${a > 0 ? "górę" : "dół"}.`,
