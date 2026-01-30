@@ -1,89 +1,54 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
-const PlanimetrySVGUtils = require("./PlanimetrySVGUtils");
+const QuadrilateralsValues = require("../../values/QuadrilateralsValues");
 
 class QuadrilateralsGenerator extends BaseGenerator {
   generateRhombus() {
-    let range;
-    if (this.difficulty === "easy") range = [4, 8];
-    else if (this.difficulty === "hard") range = [9, 15];
-    else range = [6, 12];
+    const { d1, d2, area, areaStr } = QuadrilateralsValues.generateRhombusData(
+      this.difficulty,
+    );
 
-    const d1 = MathUtils.randomInt(range[0], range[1]);
-    const d2 = MathUtils.randomInt(range[0], range[1]);
-
-    const d1_final = this.difficulty === "easy" && d1 % 2 !== 0 ? d1 + 1 : d1;
-    const d2_final = this.difficulty === "easy" && d2 % 2 !== 0 ? d2 + 1 : d2;
-
-    const area = (d1_final * d2_final) / 2;
-    const areaStr = Number.isInteger(area) ? `${area}` : area.toFixed(1);
-
-    const candidates = [
-      d1_final * d2_final,
-      d1_final + d2_final,
-      (d1_final * d2_final) / 4,
-      2 * (d1_final + d2_final),
-      area + d1_final,
-      area - d2_final,
-      Math.abs(d1_final - d2_final),
-    ];
-
-    const uniqueDistractors = [];
-    const usedValues = new Set();
-    usedValues.add(area);
-
-    for (const val of candidates) {
-      if (val > 0 && !usedValues.has(val)) {
-        const valStr = Number.isInteger(val) ? `${val}` : val.toFixed(1);
-        uniqueDistractors.push(valStr);
-        usedValues.add(val);
-      }
-      if (uniqueDistractors.length === 3) break;
-    }
-
-    let offset = 1;
-    while (uniqueDistractors.length < 3) {
-      const val = area + offset;
-      if (val > 0 && !usedValues.has(val)) {
-        const valStr = Number.isInteger(val) ? `${val}` : val.toFixed(1);
-        uniqueDistractors.push(valStr);
-        usedValues.add(val);
-      }
-      offset = offset > 0 ? -offset : -offset + 1;
-    }
+    const templates = QuadrilateralsValues.getRhombusTemplates(d1, d2);
+    const question = MathUtils.randomElement(templates)();
+    const distractors = QuadrilateralsValues.generateRhombusDistractors(
+      d1,
+      d2,
+      area,
+    );
 
     return this.createResponse({
-      question: `Pole rombu o przekątnych $$${d1_final}$$ i $$${d2_final}$$ wynosi:`,
+      question: question,
       latex: null,
       image: null,
-      variables: { d1: d1_final, d2: d2_final },
+      variables: { d1, d2 },
       correctAnswer: areaStr,
-      distractors: uniqueDistractors,
+      distractors: distractors,
       steps: [
-        `$$P = \\frac{d_1 d_2}{2} = \\frac{${d1_final} \\cdot ${d2_final}}{2} = ${areaStr}$$`,
+        `$$P = \\frac{d_1 d_2}{2} = \\frac{${d1} \\cdot ${d2}}{2} = ${areaStr}$$`,
       ],
       questionType: "closed",
     });
   }
 
   generateRhombusAngles() {
-    let angle;
-    if (this.difficulty === "easy") angle = MathUtils.randomInt(2, 6) * 10;
-    else angle = MathUtils.randomInt(15, 75);
+    const { angle, obtuse } = QuadrilateralsValues.generateRhombusAnglesData(
+      this.difficulty,
+    );
 
-    const obtuse = 180 - 2 * angle;
+    const templates = QuadrilateralsValues.getRhombusAnglesTemplates(angle);
+    const question = MathUtils.randomElement(templates)();
+    const distractors = QuadrilateralsValues.generateRhombusAnglesDistractors(
+      angle,
+      obtuse,
+    );
 
     return this.createResponse({
-      question: `Kąt między dłuższą przekątną a bokiem rombu ma miarę $$${angle}^\\circ$$. Oblicz kąt rozwarty tego rombu.`,
+      question: question,
       latex: null,
       image: null,
       variables: { alpha: angle, obtuse },
       correctAnswer: `${obtuse}^\\circ`,
-      distractors: [
-        `${2 * angle}^\\circ`,
-        `${90 + angle}^\\circ`,
-        `${180 - angle}^\\circ`,
-      ],
+      distractors: distractors,
       steps: [
         `Przekątna jest dwusieczną kąta ostrego. Cały kąt ostry: $$2 \\cdot ${angle}^\\circ = ${2 * angle}^\\circ$$.`,
         `Suma kątów przy ramieniu to $$180^\\circ$$. Kąt rozwarty: $$180^\\circ - ${2 * angle}^\\circ = ${obtuse}^\\circ$$`,
@@ -94,107 +59,71 @@ class QuadrilateralsGenerator extends BaseGenerator {
   }
 
   generateParallelogramNeighbor() {
-    let alpha;
-    if (this.difficulty === "easy") alpha = MathUtils.randomInt(4, 8) * 10;
-    else alpha = MathUtils.randomInt(35, 85);
+    const { alpha, beta } = QuadrilateralsValues.generateParallelogramData(
+      this.difficulty,
+    );
 
-    const beta = 180 - alpha;
+    const templates = QuadrilateralsValues.getParallelogramTemplates(alpha);
+    const question = MathUtils.randomElement(templates)();
+    const distractors = QuadrilateralsValues.generateParallelogramDistractors(
+      alpha,
+      beta,
+    );
+
     return this.createResponse({
-      question: `Kąt ostry równoległoboku ma miarę $$${alpha}^\\circ$$. Miara kąta rozwartego tego równoległoboku jest równa:`,
+      question: question,
       latex: null,
       image: null,
       variables: { alpha, beta },
       correctAnswer: `${beta}^\\circ`,
-      distractors: [
-        `${90 - alpha > 0 ? 90 - alpha : alpha + 10}^\\circ`,
-        `${alpha}^\\circ`,
-        `${2 * alpha}^\\circ`,
-      ],
+      distractors: distractors,
       steps: [`$$180^\\circ - ${alpha}^\\circ = ${beta}^\\circ$$`],
       questionType: "closed",
     });
   }
 
   generateTrapezoidArea() {
-    let range;
-    if (this.difficulty === "easy") range = [2, 6];
-    else if (this.difficulty === "hard") range = [8, 15];
-    else range = [4, 10];
+    const { a, b, h, area, areaStr } =
+      QuadrilateralsValues.generateTrapezoidData(this.difficulty);
 
-    const a = MathUtils.randomInt(range[0] + 2, range[1] + 4);
-    const b = MathUtils.randomInt(range[0], a - 1);
-    const h = MathUtils.randomInt(range[0], range[1]);
-
-    const b_final = this.difficulty === "easy" && (a + b) % 2 !== 0 ? b + 1 : b;
-
-    const area = 0.5 * (a + b_final) * h;
-    const areaStr = Number.isInteger(area) ? `${area}` : area.toFixed(1);
-
-    const candidates = [
-      area * 2,
-      (a + b_final) * 2,
-      a * b_final * h,
-      a * h,
-      b_final * h,
-      a + b_final + h,
-      area + h,
-      Math.abs(area - h),
-    ];
-
-    const uniqueDistractors = [];
-    const usedValues = new Set();
-    usedValues.add(area);
-
-    for (const val of candidates) {
-      if (!usedValues.has(val) && val > 0) {
-        uniqueDistractors.push(
-          Number.isInteger(val) ? `${val}` : val.toFixed(1),
-        );
-        usedValues.add(val);
-      }
-      if (uniqueDistractors.length === 3) break;
-    }
-
-    let offset = 2;
-    while (uniqueDistractors.length < 3) {
-      const val = area + offset;
-      if (val > 0 && !usedValues.has(val)) {
-        uniqueDistractors.push(
-          Number.isInteger(val) ? `${val}` : val.toFixed(1),
-        );
-        usedValues.add(val);
-      }
-      offset = offset > 0 ? -offset : -offset + 1;
-    }
+    const templates = QuadrilateralsValues.getTrapezoidTemplates(a, b, h);
+    const question = MathUtils.randomElement(templates)();
+    const distractors = QuadrilateralsValues.generateTrapezoidDistractors(
+      a,
+      b,
+      h,
+      area,
+    );
 
     return this.createResponse({
-      question: `Trapez ma podstawy $$${a}$$ i $$${b_final}$$ oraz wysokość $$${h}$$. Jego pole wynosi:`,
+      question: question,
       latex: null,
       image: null,
-      variables: { a, b: b_final, h, area },
+      variables: { a, b, h, area },
       correctAnswer: areaStr,
-      distractors: uniqueDistractors,
-      steps: [`$$P = \\frac{${a}+${b_final}}{2} \\cdot ${h} = ${areaStr}$$`],
+      distractors: distractors,
+      steps: [`$$P = \\frac{${a}+${b}}{2} \\cdot ${h} = ${areaStr}$$`],
       questionType: "closed",
     });
   }
 
   generateQuadrilateralAngles() {
-    let alpha;
-    if (this.difficulty === "easy") alpha = MathUtils.randomInt(4, 8) * 10;
-    else alpha = MathUtils.randomInt(40, 80);
+    const { alpha, beta } = QuadrilateralsValues.generateQuadAnglesData(
+      this.difficulty,
+    );
+
+    const templates = QuadrilateralsValues.getQuadAnglesTemplates(alpha);
+    const question = MathUtils.randomElement(templates)();
+    const distractors =
+      QuadrilateralsValues.generateQuadAnglesDistractors(alpha);
 
     return this.createResponse({
-      question: `Kąt ostry równoległoboku to $$${alpha}^\\circ$$. Oblicz kąt rozwarty.`,
+      question: question,
       latex: null,
       image: null,
       variables: { alpha },
-      correctAnswer: `α=${180 - alpha}^\\circ`,
-      distractors: [
-        `α=${90 - alpha > 0 ? 90 - alpha : alpha + 20}^\\circ`,
-        `α=${alpha}^\\circ`,
-        `α=${2 * alpha}^\\circ`,
-      ],
+      correctAnswer: `α=${beta}^\\circ`,
+      distractors: distractors,
       steps: [`$$180^\\circ - ${alpha}^\\circ$$`],
       questionType: "open",
       answerFormat: "α=angle^\\circ",
@@ -202,58 +131,51 @@ class QuadrilateralsGenerator extends BaseGenerator {
   }
 
   generateCyclicQuadrilateral() {
-    let alpha;
-    if (this.difficulty === "easy") alpha = MathUtils.randomInt(5, 13) * 10;
-    else alpha = MathUtils.randomInt(50, 130);
+    const { alpha, gamma } = QuadrilateralsValues.generateCyclicData(
+      this.difficulty,
+    );
 
-    const gamma = 180 - alpha;
+    const templates = QuadrilateralsValues.getCyclicTemplates(alpha);
+    const question = MathUtils.randomElement(templates)();
+    const distractors = QuadrilateralsValues.generateCyclicDistractors(
+      alpha,
+      gamma,
+    );
+
     return this.createResponse({
-      question: `W okrąg wpisano czworokąt. Kąt $$A$$ ma $$${alpha}^\\circ$$. Kąt $$C$$ ma miarę:`,
+      question: question,
       latex: null,
       image: null,
       variables: { alpha, gamma },
       correctAnswer: `${gamma}^\\circ`,
-      distractors: [
-        `${alpha}^\\circ`,
-        `${180 + alpha}^\\circ`,
-        `${360 - alpha}^\\circ`,
-      ],
+      distractors: distractors,
       steps: [`$$180^\\circ - ${alpha}^\\circ = ${gamma}^\\circ$$`],
       questionType: "closed",
     });
   }
 
   generateTangentialQuadrilateral() {
-    let range;
-    if (this.difficulty === "easy") range = [3, 6];
-    else if (this.difficulty === "hard") range = [10, 20];
-    else range = [5, 12];
+    const { a, b, c, d } = QuadrilateralsValues.generateTangentialData(
+      this.difficulty,
+    );
 
-    const a = MathUtils.randomInt(range[0], range[1]);
-    const b = MathUtils.randomInt(range[0], range[1]);
-    const c = MathUtils.randomInt(range[0], range[1]);
-
-    let d = a + c - b;
-    let a_final = a,
-      c_final = c;
-
-    if (d <= 0) {
-      a_final += Math.abs(d) + 2;
-      d = a_final + c_final - b;
-    }
+    const templates = QuadrilateralsValues.getTangentialTemplates(a, b, c);
+    const question = MathUtils.randomElement(templates)();
+    const distractors = QuadrilateralsValues.generateTangentialDistractors(
+      a,
+      b,
+      c,
+      d,
+    );
 
     return this.createResponse({
-      question: `W czworokąt wpisano okrąg. Boki $$AB=${a_final}, BC=${b}, CD=${c_final}$$. $$DA$$ wynosi:`,
+      question: question,
       latex: null,
       image: null,
-      variables: { a: a_final, b, c: c_final, d },
+      variables: { a, b, c, d },
       correctAnswer: `${d}`,
-      distractors: [
-        `${a_final + b + c_final}`,
-        `${Math.abs(a_final - c_final)}`,
-        `${a_final + c_final}`,
-      ],
-      steps: [`$$a+c = b+d \\implies d = ${a_final}+${c_final}-${b} = ${d}$$`],
+      distractors: distractors,
+      steps: [`$$a+c = b+d \\implies d = ${a}+${c}-${b} = ${d}$$`],
       questionType: "closed",
     });
   }
