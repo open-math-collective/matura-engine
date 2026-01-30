@@ -114,26 +114,44 @@ class ShapesCoordsValues {
    */
   static getCircleTangentTemplates(S, axis) {
     return [
-      () => `Okrąg o środku $$S=(${S.x}, ${S.y})$$ jest styczny do osi $$${axis}$$. Jego promień wynosi:`,
-      () => `Dla okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ podaj promień:`,
-      () => `Oblicz promień okręgu o środku $$S=(${S.x}, ${S.y})$$ stycznego do osi $$${axis}$$:`,
-      () => `Znajdź promień okręgu stycznego do $$${axis}$$ ze środkiem $$S=(${S.x}, ${S.y})$$:`,
-      () => `Wyznacz promień okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$:`,
-      () => `Promień okręgu stycznego do $$${axis}$$ o środku $$S=(${S.x}, ${S.y})$$ wynosi:`,
-      () => `Dla okręgu $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ oblicz r:`,
-      () => `Znajdź r dla okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$:`,
-      () => `Oblicz r, gdy okrąg $$S=(${S.x}, ${S.y})$$ jest styczny do $$${axis}$$:`,
-      () => `Promień okręgu $$S=(${S.x}, ${S.y})$$ stycznego do osi $$${axis}$$:`,
-      () => `Wyznacz r okręgu stycznego do $$${axis}$$ ze środkiem $$S=(${S.x}, ${S.y})$$:`,
+      () =>
+        `Okrąg o środku $$S=(${S.x}, ${S.y})$$ jest styczny do osi $$${axis}$$. Jego promień wynosi:`,
+      () =>
+        `Dla okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ podaj promień:`,
+      () =>
+        `Oblicz promień okręgu o środku $$S=(${S.x}, ${S.y})$$ stycznego do osi $$${axis}$$:`,
+      () =>
+        `Znajdź promień okręgu stycznego do $$${axis}$$ ze środkiem $$S=(${S.x}, ${S.y})$$:`,
+      () =>
+        `Wyznacz promień okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$:`,
+      () =>
+        `Promień okręgu stycznego do $$${axis}$$ o środku $$S=(${S.x}, ${S.y})$$ wynosi:`,
+      () =>
+        `Dla okręgu $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ oblicz r:`,
+      () =>
+        `Znajdź r dla okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$:`,
+      () =>
+        `Oblicz r, gdy okrąg $$S=(${S.x}, ${S.y})$$ jest styczny do $$${axis}$$:`,
+      () =>
+        `Promień okręgu $$S=(${S.x}, ${S.y})$$ stycznego do osi $$${axis}$$:`,
+      () =>
+        `Wyznacz r okręgu stycznego do $$${axis}$$ ze środkiem $$S=(${S.x}, ${S.y})$$:`,
       () => `Dla $$S=(${S.x}, ${S.y})$$ i styczności do $$${axis}$$ podaj r:`,
-      () => `Znajdź promień okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ i stycznym do $$${axis}$$:`,
-      () => `Oblicz promień okręgu stycznego do osi $$${axis}$$ ze środkiem $$S=(${S.x}, ${S.y})$$:`,
-      () => `Promień okręgu o środku $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ to:`,
-      () => `Wyznacz promień dla $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$:`,
+      () =>
+        `Znajdź promień okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ i stycznym do $$${axis}$$:`,
+      () =>
+        `Oblicz promień okręgu stycznego do osi $$${axis}$$ ze środkiem $$S=(${S.x}, ${S.y})$$:`,
+      () =>
+        `Promień okręgu o środku $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ to:`,
+      () =>
+        `Wyznacz promień dla $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$:`,
       () => `Znajdź r, gdy $$S=(${S.x}, ${S.y})$$ i styczność do $$${axis}$$:`,
-      () => `Dla okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ r wynosi:`,
-      () => `Oblicz r okręgu $$S=(${S.x}, ${S.y})$$ stycznego do osi $$${axis}$$:`,
-      () => `Promień okręgu $$S=(${S.x}, ${S.y})$$ przy styczności do $$${axis}$$:`,
+      () =>
+        `Dla okręgu ze środkiem $$S=(${S.x}, ${S.y})$$ stycznego do $$${axis}$$ r wynosi:`,
+      () =>
+        `Oblicz r okręgu $$S=(${S.x}, ${S.y})$$ stycznego do osi $$${axis}$$:`,
+      () =>
+        `Promień okręgu $$S=(${S.x}, ${S.y})$$ przy styczności do $$${axis}$$:`,
     ];
   }
 
@@ -173,7 +191,14 @@ class ShapesCoordsValues {
     if (difficulty === "easy") {
       return { rSqList: [4, 9, 16, 25, 36, 49, 64, 81, 100] };
     } else if (difficulty === "hard") {
-      return { rSqList: [2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 65, 66, 67, 68] };
+      return {
+        rSqList: [
+          2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23,
+          24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42,
+          43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+          61, 62, 63, 65, 66, 67, 68,
+        ],
+      };
     } else {
       return { rSqList: [4, 9, 25, 2, 3, 5, 6, 7, 8] };
     }
@@ -185,9 +210,10 @@ class ShapesCoordsValues {
   static generateRadiusFromEquationData(difficulty) {
     const params = this.getRadiusFromEquationParams(difficulty);
     const rSq = MathUtils.randomElement(params.rSqList);
-    const rStr = Number.isInteger(Math.sqrt(rSq)) ? `${Math.sqrt(rSq)}` : `\\sqrt{${rSq}}`;
-    
-    // Losowe współrzędne środka dla większej różnorodności
+    const rStr = Number.isInteger(Math.sqrt(rSq))
+      ? `${Math.sqrt(rSq)}`
+      : `\\sqrt{${rSq}}`;
+
     const a = MathUtils.randomInt(-3, 3);
     const b = MathUtils.randomInt(-3, 3);
 
@@ -222,8 +248,7 @@ class ShapesCoordsValues {
       () => `Dla $$(x-1)^2 + (y+2)^2 = ${rSq}$$ r jest równe:`,
       () => `Oblicz długość promienia dla $$(x-1)^2 + (y+2)^2 = ${rSq}$$:`,
       () => `Promień okręgu o równaniu $$(x-1)^2 + (y+2)^2 = ${rSq}$$ to:`,
-      () => `Jaki jest promień okręgu $$(x-1)^2 + (y+2)^2 = ${rSq}$$:`
-,
+      () => `Jaki jest promień okręgu $$(x-1)^2 + (y+2)^2 = ${rSq}$$:`,
       () => `Wartość promienia r dla $$(x-1)^2 + (y+2)^2 = ${rSq}$$:`,
 
       () => `Dla równania $$(x-1)^2 + (y+2)^2 = ${rSq}$$ oblicz promień:`,
@@ -280,26 +305,46 @@ class ShapesCoordsValues {
    */
   static getParallelogramVertexTemplates(A, B, C) {
     return [
-      () => `Wierzchołki równoległoboku ABCD: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y}), C(${C.x},${C.y})$$. Oblicz współrzędne wierzchołka $$D$$.`,
-      () => `Dla równoległoboku ABCD z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ znajdź D:`,
-      () => `Znajdź wierzchołek D równoległoboku ABCD, gdy $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Wyznacz współrzędne D równoległoboku o wierzchołkach $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Oblicz D dla równoległoboku z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ znajdź wierzchołek D:`,
-      () => `Znajdź współrzędne wierzchołka D równoległoboku ABCD: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Wyznacz D dla równoległoboku z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Oblicz współrzędne D równoległoboku ABCD z $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Dla równoległoboku ABCD ze znanymi A, B, C znajdź D: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Znajdź brakujący wierzchołek D równoległoboku: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Wyznacz wierzchołek D równoległoboku ABCD dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Oblicz współrzędne punktu D równoległoboku: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ oblicz wierzchołek D:`,
-      () => `Znajdź D równoległoboku ABCD o wierzchołkach $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Wyznacz punkt D dla równoległoboku z $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Oblicz brakujący wierzchołek D: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Dla równoległoboku z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ znajdź D:`,
-      () => `Znajdź współrzędne D w równoległoboku ABCD: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
-      () => `Wyznacz D dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ w równoległoboku:`,
+      () =>
+        `Wierzchołki równoległoboku ABCD: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y}), C(${C.x},${C.y})$$. Oblicz współrzędne wierzchołka $$D$$.`,
+      () =>
+        `Dla równoległoboku ABCD z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ znajdź D:`,
+      () =>
+        `Znajdź wierzchołek D równoległoboku ABCD, gdy $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Wyznacz współrzędne D równoległoboku o wierzchołkach $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Oblicz D dla równoległoboku z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ znajdź wierzchołek D:`,
+      () =>
+        `Znajdź współrzędne wierzchołka D równoległoboku ABCD: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Wyznacz D dla równoległoboku z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Oblicz współrzędne D równoległoboku ABCD z $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Dla równoległoboku ABCD ze znanymi A, B, C znajdź D: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Znajdź brakujący wierzchołek D równoległoboku: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Wyznacz wierzchołek D równoległoboku ABCD dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Oblicz współrzędne punktu D równoległoboku: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ oblicz wierzchołek D:`,
+      () =>
+        `Znajdź D równoległoboku ABCD o wierzchołkach $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Wyznacz punkt D dla równoległoboku z $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Oblicz brakujący wierzchołek D: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Dla równoległoboku z wierzchołkami $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ znajdź D:`,
+      () =>
+        `Znajdź współrzędne D w równoległoboku ABCD: $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$:`,
+      () =>
+        `Wyznacz D dla $$A(${A.x},${A.y})$$, $$B(${B.x},${B.y})$$, $$C(${C.x},${C.y})$$ w równoległoboku:`,
     ];
   }
 
@@ -385,26 +430,46 @@ class ShapesCoordsValues {
    */
   static getTriangleAreaCoordsTemplates(x1, y1, x2, y2, x3, y3) {
     return [
-      () => `Oblicz pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$.`,
-      () => `Znajdź pole trójkąta ABC z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Wyznacz pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Dla trójkąta z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ oblicz pole:`,
-      () => `Pole trójkąta ABC: $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ wynosi:`,
-      () => `Znajdź pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Oblicz pole trójkąta ABC dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Wyznacz pole trójkąta z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ znajdź pole trójkąta:`,
-      () => `Pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Znajdź pole trójkąta ABC: $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Oblicz pole trójkąta dla wierzchołków $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Wyznacz pole trójkąta ABC: $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Dla trójkąta ABC ze współrzędnymi $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ oblicz pole:`,
-      () => `Znajdź pole trójkąta ze współrzędnymi $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Oblicz pole trójkąta o podanych wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Pole trójkąta z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ wynosi:`,
-      () => `Wyznacz pole trójkąta dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Znajdź pole trójkąta ABC o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
-      () => `Dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ oblicz pole trójkąta ABC:`,
+      () =>
+        `Oblicz pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$.`,
+      () =>
+        `Znajdź pole trójkąta ABC z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Wyznacz pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Dla trójkąta z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ oblicz pole:`,
+      () =>
+        `Pole trójkąta ABC: $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ wynosi:`,
+      () =>
+        `Znajdź pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Oblicz pole trójkąta ABC dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Wyznacz pole trójkąta z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ znajdź pole trójkąta:`,
+      () =>
+        `Pole trójkąta o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Znajdź pole trójkąta ABC: $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Oblicz pole trójkąta dla wierzchołków $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Wyznacz pole trójkąta ABC: $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Dla trójkąta ABC ze współrzędnymi $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ oblicz pole:`,
+      () =>
+        `Znajdź pole trójkąta ze współrzędnymi $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Oblicz pole trójkąta o podanych wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Pole trójkąta z wierzchołkami $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ wynosi:`,
+      () =>
+        `Wyznacz pole trójkąta dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Znajdź pole trójkąta ABC o wierzchołkach $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$:`,
+      () =>
+        `Dla $$A(${x1},${y1})$$, $$B(${x2},${y2})$$, $$C(${x3},${y3})$$ oblicz pole trójkąta ABC:`,
     ];
   }
 

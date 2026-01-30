@@ -35,7 +35,7 @@ function runTest() {
 
         if (dists.length !== 3) {
           console.error(
-            `FAIL: Invalid distractor count in ${method}: ${dists.length}`
+            `FAIL: Invalid distractor count in ${method}: ${dists.length}`,
           );
           console.error("Problem:", JSON.stringify(problem, null, 2));
           process.exit(1);
@@ -44,7 +44,7 @@ function runTest() {
         const allAnswers = [cAnswer, ...dists];
         if (new Set(allAnswers).size !== 4) {
           console.error(
-            `FAIL: Duplicate answers generated inside single problem in ${method}`
+            `FAIL: Duplicate answers generated inside single problem in ${method}`,
           );
           console.error("Correct:", cAnswer);
           console.error("Distractors:", dists);
@@ -74,11 +74,13 @@ function runTest() {
         }
       }
 
-      console.log(`  - Unique problems generated: ${uniqueCount} / ${iterations}`);
+      console.log(
+        `  - Unique problems generated: ${uniqueCount} / ${iterations}`,
+      );
 
       if (uniqueCount < iterations * 0.95) {
         console.error(
-          `FAIL: Too many collisions in ${method}. Expected >= 950 unique, got ${uniqueCount}.`
+          `FAIL: Too many collisions in ${method}. Expected >= 950 unique, got ${uniqueCount}.`,
         );
         process.exit(1);
       }

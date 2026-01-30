@@ -1,13 +1,10 @@
 const BaseGenerator = require("../../../../core/BaseGenerator");
 const MathUtils = require("../../../../utils/MathUtils");
-const AnalyticSVGUtils = require("./AnalyticSVGUtils");
 const ShapesCoordsValues = require("../../values/ShapesCoordsValues");
 
 class ShapesCoordsGenerator extends BaseGenerator {
   generateCircleProblem() {
-    const { S, r, eq } = ShapesCoordsValues.generateCircleData(
-      this.difficulty
-    );
+    const { S, r, eq } = ShapesCoordsValues.generateCircleData(this.difficulty);
 
     const templates = ShapesCoordsValues.getCircleTemplates();
     const question = MathUtils.randomElement(templates)();
@@ -19,10 +16,7 @@ class ShapesCoordsGenerator extends BaseGenerator {
       variables: { S, r },
       correctAnswer: `S=(${S.x},${S.y}), r=${r}`,
       distractors: ShapesCoordsValues.generateCircleDistractors(S, r),
-      steps: [
-        `$$(x-a)^2+(y-b)^2=r^2$$`,
-        `$$a=${S.x}, b=${S.y}, r=${r}$$`,
-      ],
+      steps: [`$$(x-a)^2+(y-b)^2=r^2$$`, `$$a=${S.x}, b=${S.y}, r=${r}$$`],
       questionType: "open",
       answerFormat: "S=(x, y), r=d",
     });
@@ -30,7 +24,7 @@ class ShapesCoordsGenerator extends BaseGenerator {
 
   generateCircleTangentToAxis() {
     const { S, axis, r } = ShapesCoordsValues.generateCircleTangentData(
-      this.difficulty
+      this.difficulty,
     );
 
     const templates = ShapesCoordsValues.getCircleTangentTemplates(S, axis);
@@ -45,7 +39,7 @@ class ShapesCoordsGenerator extends BaseGenerator {
       distractors: ShapesCoordsValues.generateCircleTangentDistractors(
         S,
         axis,
-        r
+        r,
       ),
       steps: [
         `Odległość środka od osi $$${axis}$$ jest równa promieniowi. $$r = |${axis === "Ox" ? S.y : S.x}| = ${r}$$`,
@@ -55,11 +49,14 @@ class ShapesCoordsGenerator extends BaseGenerator {
   }
 
   generateRadiusFromEquation() {
-    const { rSq, rStr, a, b } = ShapesCoordsValues.generateRadiusFromEquationData(
-      this.difficulty
-    );
+    const { rSq, rStr, a, b } =
+      ShapesCoordsValues.generateRadiusFromEquationData(this.difficulty);
 
-    const templates = ShapesCoordsValues.getRadiusFromEquationTemplates(rSq, a, b);
+    const templates = ShapesCoordsValues.getRadiusFromEquationTemplates(
+      rSq,
+      a,
+      b,
+    );
     const question = MathUtils.randomElement(templates)();
 
     return this.createResponse({
@@ -68,9 +65,8 @@ class ShapesCoordsGenerator extends BaseGenerator {
       image: null,
       variables: { rSq, a, b },
       correctAnswer: rStr,
-      distractors: ShapesCoordsValues.generateRadiusFromEquationDistractors(
-        rSq
-      ),
+      distractors:
+        ShapesCoordsValues.generateRadiusFromEquationDistractors(rSq),
       steps: [`$$r^2 = ${rSq} \\implies r = ${rStr}$$`],
       questionType: "closed",
     });
@@ -78,13 +74,13 @@ class ShapesCoordsGenerator extends BaseGenerator {
 
   generateParallelogramVertex() {
     const { A, B, C, D } = ShapesCoordsValues.generateParallelogramVertexData(
-      this.difficulty
+      this.difficulty,
     );
 
     const templates = ShapesCoordsValues.getParallelogramVertexTemplates(
       A,
       B,
-      C
+      C,
     );
     const question = MathUtils.randomElement(templates)();
 
@@ -98,7 +94,7 @@ class ShapesCoordsGenerator extends BaseGenerator {
         A,
         B,
         C,
-        D
+        D,
       ),
       steps: [
         `$$x_D = x_A + x_C - x_B = ${D.x}$$`,
@@ -110,18 +106,8 @@ class ShapesCoordsGenerator extends BaseGenerator {
   }
 
   generateTriangleAreaCoords() {
-    const {
-      x1,
-      y1,
-      x2,
-      y2,
-      x3,
-      y3,
-      base,
-      h,
-      area,
-      isHorizontal,
-    } = ShapesCoordsValues.generateTriangleAreaCoordsData(this.difficulty);
+    const { x1, y1, x2, y2, x3, y3, base, h, area, isHorizontal } =
+      ShapesCoordsValues.generateTriangleAreaCoordsData(this.difficulty);
 
     const templates = ShapesCoordsValues.getTriangleAreaCoordsTemplates(
       x1,
@@ -129,15 +115,12 @@ class ShapesCoordsGenerator extends BaseGenerator {
       x2,
       y2,
       x3,
-      y3
+      y3,
     );
     const question = MathUtils.randomElement(templates)();
 
-    const distractors = ShapesCoordsValues.generateTriangleAreaCoordsDistractors(
-      area,
-      base,
-      h
-    );
+    const distractors =
+      ShapesCoordsValues.generateTriangleAreaCoordsDistractors(area, base, h);
 
     return this.createResponse({
       question: question,
